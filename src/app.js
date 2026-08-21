@@ -12,6 +12,9 @@ const routes = require('./routes');
 
 const app = express();
 
+// Trust reverse proxy (Required for Render, Heroku, Nginx HTTPS cookies)
+app.set('trust proxy', 1);
+
 // Security Headers (Helmet)
 app.use(
   helmet({
