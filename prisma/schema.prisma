@@ -1,0 +1,324 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+  STUDENT
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum IssueStatus {
+  ISSUED
+  RETURNED
+  OVERDUE
+}
+
+enum FineStatus {
+  UNPAID
+  PAID
+  WAIVED
+  UNDER_VERIFICATION
+}
+
+enum NotificationType {
+  BOOK_REQUEST
+  REQUEST_APPROVED
+  REQUEST_REJECTED
+  BOOK_DUE
+  BOOK_OVERDUE
+  FINE
+  GENERAL
+}
+
+model User {
+  id            Int                @id @default(autoincrement())
+  name          String
+  email         String             @unique
+  password_hash String
+  role          UserRole           @default(STUDENT)
+  phone         String?
+  profile_image String?
+  is_active     Boolean            @default(true)
+  created_at    DateTime           @default(now())
+  updated_at    DateTime           @updatedAt
+
+  student_profile   StudentProfile?
+  employee_profile  EmployeeProfile?
+  issued_records    IssuedBook[]       @relation("AdminIssued")
+  reviewed_requests BookIssueRequest[] @relation("AdminReviewed")
+  notifications     Notification[]
+  activity_logs     EmployeeActivityLog[]
+
+  @@map("users")
+}
+
+model StudentProfile {
+  id                Int                @id @default(autoincrement())
+  user_id           Int                @unique
+  student_id        String             @unique
+  enrollment_number String?
+  department        String
+  course            String
+  semester          String?
+  year              String?
+  address           String?
+  date_of_birth     DateTime?
+  joined_at         DateTime           @default(now())
+
+  user              User                @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  requests          BookIssueRequest[]
+  issues            IssuedBook[]
+  fines             Fine[]
+  memberships       StudentMembership[]
+
+  @@map("student_profiles")
+}
+
+model StudentMembership {
+  id               Int              @id @default(autoincrement())
+  student_id       Int
+  plan_name        String           @default("Monthly Student Pass")
+  monthly_fee      Decimal          @default(500.00) @db.Decimal(10, 2)
+  fee_status       FeePaymentStatus @default(PAID)
+  valid_from       DateTime         @default(now())
+  valid_until      DateTime
+  paid_at          DateTime?
+  payment_method   String?          @default("UPI / Cash")
+  receipt_number   String?          @unique
+  utr_number       String?
+  screenshot_url   String?
+  submitted_at     DateTime?
+  rejection_reason String?
+  notes            String?
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+
+  student        StudentProfile   @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@index([student_id])
+  @@index([fee_status])
+  @@map("student_memberships")
+}
+
+enum FeePaymentStatus {
+  PAID
+  PENDING
+  UNDER_VERIFICATION
+}
+
+model EmployeeProfile {
+  id           Int                  @id @default(autoincrement())
+  user_id      Int                  @unique
+  employee_id  String               @unique
+  department   String
+  designation  String
+  phone        String?
+  joining_date DateTime             @default(now())
+  status       EmployeeStatus       @default(ACTIVE)
+  created_at   DateTime             @default(now())
+  updated_at   DateTime             @updatedAt
+
+  user         User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  permissions  EmployeePermission[]
+
+  @@map("employee_profiles")
+}
+
+model EmployeePermission {
+  id          Int             @id @default(autoincrement())
+  employee_id Int
+  permission  String
+  created_at  DateTime        @default(now())
+
+  employee    EmployeeProfile @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+
+  @@unique([employee_id, permission])
+  @@index([employee_id])
+  @@map("employee_permissions")
+}
+
+model EmployeeActivityLog {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  action     String
+  entity     String
+  entity_id  Int?
+  details    String?  @db.Text
+  ip_address String?
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([created_at])
+  @@map("employee_activity_logs")
+}
+
+model Author {
+  id         Int      @id @default(autoincrement())
+  name       String
+  biography  String?  @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  books      Book[]
+
+  @@map("authors")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?  @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  books       Book[]
+
+  @@map("categories")
+}
+
+model Book {
+  id               Int                @id @default(autoincrement())
+  isbn             String?            @unique
+  title            String
+  description      String?            @db.Text
+  author_id        Int
+  category_id      Int
+  publisher        String?
+  publication_year Int?
+  language         String             @default("English")
+  total_copies     Int                @default(1)
+  available_copies Int                @default(1)
+  shelf_location   String?
+  cover_image      String?
+  is_archived      Boolean            @default(false)
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+
+  author           Author             @relation(fields: [author_id], references: [id], onDelete: Restrict)
+  category         Category           @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  requests         BookIssueRequest[]
+  issues           IssuedBook[]
+
+  @@index([title])
+  @@index([author_id])
+  @@index([category_id])
+  @@map("books")
+}
+
+model BookIssueRequest {
+  id               Int           @id @default(autoincrement())
+  student_id       Int
+  book_id          Int
+  request_date     DateTime      @default(now())
+  status           RequestStatus @default(PENDING)
+  reviewed_by      Int?
+  reviewed_at      DateTime?
+  rejection_reason String?
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+
+  student          StudentProfile @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  book             Book           @relation(fields: [book_id], references: [id], onDelete: Restrict)
+  reviewer         User?          @relation("AdminReviewed", fields: [reviewed_by], references: [id])
+
+  @@index([student_id])
+  @@index([book_id])
+  @@index([status])
+  @@map("book_issue_requests")
+}
+
+model IssuedBook {
+  id            Int         @id @default(autoincrement())
+  student_id    Int
+  book_id       Int
+  issued_by     Int
+  issue_date    DateTime    @default(now())
+  due_date      DateTime
+  returned_date DateTime?
+  status        IssueStatus @default(ISSUED)
+  renewal_count Int         @default(0)
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+
+  student       StudentProfile @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  book          Book           @relation(fields: [book_id], references: [id], onDelete: Restrict)
+  issuer        User           @relation("AdminIssued", fields: [issued_by], references: [id])
+  fines         Fine[]
+
+  @@index([student_id])
+  @@index([book_id])
+  @@index([status])
+  @@map("issued_books")
+}
+
+model Fine {
+  id               Int        @id @default(autoincrement())
+  issue_id         Int
+  student_id       Int
+  amount           Decimal    @db.Decimal(10, 2)
+  reason           String
+  status           FineStatus @default(UNPAID)
+  paid_at          DateTime?
+  payment_method   String?    @default("UPI / Cash")
+  receipt_number   String?
+  utr_number       String?
+  screenshot_url   String?
+  submitted_at     DateTime?
+  rejection_reason String?
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @updatedAt
+
+  issue      IssuedBook     @relation(fields: [issue_id], references: [id], onDelete: Cascade)
+  student    StudentProfile @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@index([student_id])
+  @@index([issue_id])
+  @@index([status])
+  @@map("fines")
+}
+
+model Notification {
+  id         Int              @id @default(autoincrement())
+  user_id    Int
+  title      String
+  message    String           @db.Text
+  type       NotificationType @default(GENERAL)
+  is_read    Boolean          @default(false)
+  created_at DateTime         @default(now())
+
+  user       User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([is_read])
+  @@map("notifications")
+}
+
+model SystemSetting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  description String?
+  updated_at  DateTime @updatedAt
+
+  @@map("system_settings")
+}

@@ -1,0 +1,147 @@
+<%- include('../../partials/head.html') %>
+
+<div class="admin-wrapper">
+  <%- include('../../partials/sidebar.html') %>
+
+  <div class="admin-content">
+    <%- include('../../partials/navbar.html') %>
+
+    <main class="admin-main-body">
+      <%- include('../../partials/alerts.html') %>
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold mb-1">Book Circulation & Issued Books</h2>
+          <p class="text-muted mb-0">Track issued books, return processing, due dates, and renewals.</p>
+        </div>
+        <div>
+          <a href="/issues/admin/create" class="btn btn-primary d-flex align-items-center gap-2">
+            <i class="bi bi-journal-plus"></i> Issue Book
+          </a>
+        </div>
+      </div>
+
+      <!-- Filter Card -->
+      <div class="card filter-card mb-4">
+        <form action="/issues/admin" method="GET" class="row g-3 align-items-end">
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-muted">Search Issued Books</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+              <input type="text" class="form-control" name="search" value="<%= search %>" placeholder="Student name, Student ID, Book title, ISBN...">
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold text-muted">Issue Status</label>
+            <select class="form-select" name="status">
+              <option value="ACTIVE" <%= selectedStatus === 'ACTIVE' ? 'selected' : '' %>>All Active (Issued & Overdue)</option>
+              <option value="ISSUED" <%= selectedStatus === 'ISSUED' ? 'selected' : '' %>>Issued (On-Time)</option>
+              <option value="OVERDUE" <%= selectedStatus === 'OVERDUE' ? 'selected' : '' %>>Overdue Returns Only</option>
+              <option value="RETURNED" <%= selectedStatus === 'RETURNED' ? 'selected' : '' %>>Returned Books</option>
+              <option value="ALL" <%= selectedStatus === 'ALL' ? 'selected' : '' %>>All History</option>
+            </select>
+          </div>
+
+          <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+            <a href="/issues/admin" class="btn btn-outline-secondary" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Issues Table -->
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 table-custom">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Book Title</th>
+                  <th>Issue Date</th>
+                  <th>Due Date</th>
+                  <th>Renewals</th>
+                  <th>Status / Overdue</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (issues && issues.length > 0) { %>
+                  <% issues.forEach(function(i) { %>
+                    <tr>
+                      <td>
+                        <div class="fw-bold text-dark"><%= i.student.user.name %></div>
+                        <div class="small text-muted font-monospace"><%= i.student.student_id %></div>
+                      </td>
+                      <td>
+                        <a href="/books/<%= i.book.id %>" class="fw-bold text-dark text-decoration-none"><%= i.book.title %></a>
+                        <div class="small text-muted font-monospace">ISBN: <%= i.book.isbn || 'N/A' %></div>
+                      </td>
+                      <td><%= i.issue_date.toLocaleDateString() %></td>
+                      <td>
+                        <span class="fw-semibold text-dark"><%= i.due_date.toLocaleDateString() %></span>
+                        <% const daysRem = helpers.getDaysRemaining(i.due_date); %>
+                        <% if (i.status === 'ISSUED') { %>
+                          <% if (daysRem <= 3) { %>
+                            <div class="small text-warning fw-semibold">Due in <%= daysRem %> day(s)</div>
+                          <% } else { %>
+                            <div class="small text-muted"><%= daysRem %> days remaining</div>
+                          <% } %>
+                        <% } else if (i.status === 'OVERDUE') { %>
+                          <div class="small text-danger fw-bold"><%= Math.abs(daysRem) %> day(s) Overdue</div>
+                        <% } %>
+                      </td>
+                      <td>
+                        <span class="badge bg-light text-dark border"><%= i.renewal_count %> / <%= systemSettings ? systemSettings.renewal_limit : 2 %></span>
+                      </td>
+                      <td>
+                        <% const badge = helpers.getStatusBadge(i.status); %>
+                        <span class="badge <%= badge.class %>"><%= badge.label %></span>
+                        <% if (i.status === 'RETURNED') { %>
+                          <div class="small text-muted">Returned: <%= i.returned_date ? i.returned_date.toLocaleDateString() : '' %></div>
+                        <% } %>
+                      </td>
+                      <td class="text-end">
+                        <% if (i.status === 'ISSUED' || i.status === 'OVERDUE') { %>
+                          <div class="btn-group btn-group-sm">
+                            <form action="/issues/admin/<%= i.id %>/return" method="POST" class="d-inline">
+                              <button type="submit" class="btn btn-success" onclick="return confirm('Process return for <%= i.book.title %>?')">
+                                <i class="bi bi-box-arrow-in-left me-1"></i> Accept Return
+                              </button>
+                            </form>
+                            <% if (i.renewal_count < (systemSettings ? systemSettings.renewal_limit : 2)) { %>
+                              <form action="/issues/<%= i.id %>/renew" method="POST" class="d-inline ms-1">
+                                <button type="submit" class="btn btn-outline-primary" title="Extend due date">
+                                  <i class="bi bi-arrow-clockwise"></i> Renew
+                                </button>
+                              </form>
+                            <% } %>
+                          </div>
+                        <% } else { %>
+                          <span class="text-muted small">Returned</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="7" class="text-center py-5 text-muted">
+                      <i class="bi bi-journal-check fs-1 d-block mb-2 text-secondary"></i>
+                      No active or historical book issue records found.
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <%- include('../../partials/pagination.html') %>
+
+    </main>
+
+    <%- include('../../partials/footer.html') %>
+  </div>
+</div>

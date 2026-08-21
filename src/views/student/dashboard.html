@@ -1,0 +1,201 @@
+<%- include('../partials/head.html') %>
+<%- include('../partials/navbar.html') %>
+
+<main class="container my-4 flex-grow-1">
+  <%- include('../partials/alerts.html') %>
+
+  <!-- Student Welcome Banner -->
+  <div class="student-banner">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h2 class="student-banner-title">Welcome back, <%= currentUser.name %>!</h2>
+        <p class="student-banner-subtitle">
+          <span class="badge bg-white text-primary font-monospace me-2"><%= currentStudent.student_id %></span>
+          <%= currentStudent.course %> &bull; <%= currentStudent.department %>
+        </p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end">
+        <a href="/memberships/student" class="btn btn-outline-light fw-semibold shadow-sm">
+          <i class="bi bi-credit-card-2-front me-1"></i> Membership Status
+        </a>
+        <a href="/books" class="btn btn-light fw-semibold shadow-sm">
+          <i class="bi bi-search me-1"></i> Catalog
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Membership Fee & Fines Alert Banner -->
+  <% if (activeMembership && activeMembership.fee_status === 'PENDING') { %>
+    <div class="alert alert-warning shadow-sm d-flex justify-content-between align-items-center mb-4">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-exclamation-circle-fill fs-4 text-warning"></i>
+        <div>
+          <strong>Monthly Library Membership Fee Due: <%= helpers.formatCurrency(activeMembership.monthly_fee) %></strong>
+          <div class="small">Your monthly library pass renewal fee is pending. Please settle at the central library desk.</div>
+        </div>
+      </div>
+      <a href="/memberships/student" class="btn btn-warning btn-sm fw-semibold">View Pass</a>
+    </div>
+  <% } %>
+
+  <% if (unpaidFinesTotal > 0) { %>
+    <div class="alert alert-danger shadow-sm d-flex justify-content-between align-items-center mb-4">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-exclamation-octagon-fill fs-4 text-danger"></i>
+        <div>
+          <strong>Outstanding Overdue Fines: <%= helpers.formatCurrency(unpaidFinesTotal) %></strong>
+          <div class="small">You have <%= unpaidFinesCount %> unpaid overdue penalty record(s). Please visit the library desk to settle.</div>
+        </div>
+      </div>
+      <a href="/fines/student" class="btn btn-danger btn-sm">View Fines</a>
+    </div>
+  <% } %>
+
+  <!-- Quick Stats Counter Row -->
+  <div class="row g-3 mb-4">
+    <!-- Membership Status -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 shadow-sm h-100 border-start <%= activeMembership && activeMembership.fee_status === 'PAID' ? 'border-success' : 'border-warning' %> border-4">
+        <span class="text-muted small fw-semibold text-uppercase">Monthly Membership</span>
+        <div class="fs-4 fw-bold <%= activeMembership && activeMembership.fee_status === 'PAID' ? 'text-success' : 'text-warning' %>">
+          <%= activeMembership ? activeMembership.fee_status : 'ACTIVE' %>
+        </div>
+        <div class="small text-muted font-monospace"><%= helpers.formatCurrency(activeMembership ? activeMembership.monthly_fee : 500) %>/month</div>
+      </div>
+    </div>
+
+    <!-- Active Borrowed Books -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 shadow-sm h-100 border-start border-primary border-4">
+        <span class="text-muted small fw-semibold text-uppercase">Currently Borrowed</span>
+        <div class="fs-4 fw-bold text-dark"><%= activeIssues.length %> <span class="fs-6 fw-normal text-muted">/ <%= systemSettings ? systemSettings.max_books_per_student : 3 %> allowed</span></div>
+        <div class="small text-muted">Active in possession</div>
+      </div>
+    </div>
+
+    <!-- Pending Requests -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 shadow-sm h-100 border-start border-warning border-4">
+        <span class="text-muted small fw-semibold text-uppercase">Book Requests</span>
+        <div class="fs-4 fw-bold text-dark"><%= pendingRequests.length %></div>
+        <div class="small text-muted">Pending approval</div>
+      </div>
+    </div>
+
+    <!-- Overdue Status -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 shadow-sm h-100 border-start <%= overdueCount > 0 ? 'border-danger' : 'border-success' %> border-4">
+        <span class="text-muted small fw-semibold text-uppercase">Overdue Books</span>
+        <div class="fs-4 fw-bold <%= overdueCount > 0 ? 'text-danger' : 'text-success' %>"><%= overdueCount %></div>
+        <div class="small text-muted">Past return date</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Active Borrowed Books Section -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold"><i class="bi bi-book text-primary me-2"></i> Currently Issued Books</h5>
+          <a href="/issues/student/my-books" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="card-body p-0">
+          <% if (activeIssues && activeIssues.length > 0) { %>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Book Title</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th class="text-end">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% activeIssues.forEach(function(i) { %>
+                    <tr>
+                      <td>
+                        <a href="/books/<%= i.book.id %>" class="fw-bold text-dark text-decoration-none d-block"><%= i.book.title %></a>
+                        <span class="small text-muted"><%= i.book.author.name %></span>
+                      </td>
+                      <td><%= i.issue_date.toLocaleDateString('en-IN') %></td>
+                      <td>
+                        <% const daysRem = helpers.getDaysRemaining(i.due_date); %>
+                        <div class="<%= daysRem < 0 ? 'text-danger fw-bold' : (daysRem <= 2 ? 'text-warning fw-bold' : 'text-dark') %>">
+                          <%= i.due_date.toLocaleDateString('en-IN') %>
+                        </div>
+                        <span class="small <%= daysRem < 0 ? 'text-danger' : (daysRem <= 2 ? 'text-warning' : 'text-muted') %>">
+                          <%= daysRem < 0 ? `Overdue by ${Math.abs(daysRem)} days` : `${daysRem} days remaining` %>
+                        </span>
+                      </td>
+                      <td>
+                        <% if (i.status === 'OVERDUE') { %>
+                          <span class="badge badge-overdue">OVERDUE</span>
+                        <% } else { %>
+                          <span class="badge badge-active">ISSUED</span>
+                        <% } %>
+                      </td>
+                      <td class="text-end">
+                        <% if (i.renewal_count < (systemSettings ? parseInt(systemSettings.renewal_limit) : 2) && i.status !== 'OVERDUE') { %>
+                          <form action="/issues/student/<%= i.id %>/renew" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-outline-primary btn-sm" title="Renew Book">
+                              <i class="bi bi-arrow-repeat"></i> Renew
+                            </button>
+                          </form>
+                        <% } else { %>
+                          <span class="small text-muted">Max renewals</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="text-center py-5 text-muted">
+              <i class="bi bi-book-half fs-1 d-block mb-2 text-secondary"></i>
+              <p class="mb-2">You do not have any active books issued right now.</p>
+              <a href="/books" class="btn btn-sm btn-primary">Find a Book to Borrow</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions & Notifications Column -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h5 class="mb-0 fw-bold"><i class="bi bi-lightning-charge text-warning me-2"></i> Quick Actions</h5>
+        </div>
+        <div class="card-body d-flex flex-column gap-2">
+          <a href="/books" class="btn btn-outline-primary text-start d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-search me-2"></i> Browse Book Catalog</span>
+            <i class="bi bi-chevron-right small"></i>
+          </a>
+          <a href="/memberships/student" class="btn btn-outline-dark text-start d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-credit-card-2-front me-2"></i> My Membership & Fees</span>
+            <i class="bi bi-chevron-right small"></i>
+          </a>
+          <a href="/issues/student/my-books" class="btn btn-outline-dark text-start d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-journal-bookmark me-2"></i> My Borrowed Books</span>
+            <i class="bi bi-chevron-right small"></i>
+          </a>
+          <a href="/requests/student" class="btn btn-outline-dark text-start d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-send me-2"></i> Track Issue Requests</span>
+            <i class="bi bi-chevron-right small"></i>
+          </a>
+          <a href="/fines/student" class="btn btn-outline-danger text-start d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-cash-stack me-2"></i> Overdue Penalties</span>
+            <i class="bi bi-chevron-right small"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer.html') %>

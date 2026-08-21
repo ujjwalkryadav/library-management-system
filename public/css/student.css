@@ -1,0 +1,133 @@
+/* Student Portal Theme Stylesheet matching Greenfield College Library palette */
+
+.student-welcome-banner {
+  background: linear-gradient(135deg, #0F382A 0%, #0B291E 100%);
+  color: #FFFFFF;
+  border-radius: var(--radius-lg);
+  padding: 2.25rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 24px rgba(15, 56, 42, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.student-welcome-banner::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 157, 92, 0.2) 0%, transparent 70%);
+}
+
+.student-welcome-banner h2 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+}
+
+/* Stat summary cards */
+.student-stat-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-cream-border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.student-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.student-stat-card .stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+  font-size: 1.3rem;
+}
+
+.student-stat-card .stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.student-stat-card .stat-label {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Book catalog cards in Student Portal */
+.book-catalog-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-cream-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.book-catalog-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.book-catalog-card .card-img-top-wrapper {
+  background: #FBF9F5;
+  padding: 1.25rem;
+  text-align: center;
+  border-bottom: 1px solid #F1ECE2;
+}
+
+.book-catalog-card .card-img-top-wrapper img {
+  height: 190px;
+  width: 130px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* Due Countdown Badges */
+.due-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+}
+
+.due-ok {
+  background-color: #E8F8EE;
+  color: #16A34A;
+  border: 1px solid #BBF7D0;
+}
+
+.due-warning {
+  background-color: #FEF6EB;
+  color: #D97706;
+  border: 1px solid #FDE68A;
+}
+
+.due-danger {
+  background-color: #FEEEEE;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+  animation: pulse-danger 2s infinite;
+}
+
+@keyframes pulse-danger {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}

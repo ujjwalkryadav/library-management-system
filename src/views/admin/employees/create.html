@@ -1,0 +1,134 @@
+<%- include('../../partials/head.html') %>
+
+<div class="admin-layout">
+  <%- include('../../partials/sidebar.html') %>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-light d-lg-none border" type="button" id="sidebarToggleBtn">
+          <i class="bi bi-list"></i>
+        </button>
+        <h5 class="mb-0 fw-bold font-serif">Add New Staff Member</h5>
+      </div>
+      <div>
+        <a href="/admin/employees" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Back to Directory
+        </a>
+      </div>
+    </header>
+
+    <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
+      <%- include('../../partials/alerts.html') %>
+
+      <form action="/admin/employees" method="POST">
+        <div class="row g-4">
+          <!-- Left Column: Personal & Academic Info -->
+          <div class="col-lg-5">
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-header bg-white">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-person-lines-fill text-primary me-2"></i> Staff Profile Details</h6>
+              </div>
+              <div class="card-body p-4">
+                <div class="mb-3">
+                  <label for="name" class="form-label small fw-semibold">Full Name *</label>
+                  <input type="text" class="form-control" id="name" name="name" value="<%= formData.name || '' %>" placeholder="e.g. Pooja Sharma" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="email" class="form-label small fw-semibold">Institutional Email *</label>
+                  <input type="email" class="form-control" id="email" name="email" value="<%= formData.email || '' %>" placeholder="pooja.sharma@library.local" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="employeeId" class="form-label small fw-semibold">Employee ID *</label>
+                  <input type="text" class="form-control font-monospace" id="employeeId" name="employeeId" value="<%= formData.employeeId || '' %>" placeholder="EMP2026002" required>
+                  <div class="form-text" style="font-size: 0.72rem;">Unique institutional staff identifier.</div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="department" class="form-label small fw-semibold">Department *</label>
+                  <input type="text" class="form-control" id="department" name="department" value="<%= formData.department || '' %>" placeholder="e.g. Circulation & Cataloging" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="designation" class="form-label small fw-semibold">Designation / Role Title *</label>
+                  <input type="text" class="form-control" id="designation" name="designation" value="<%= formData.designation || '' %>" placeholder="e.g. Assistant Librarian" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="phone" class="form-label small fw-semibold">Contact Phone</label>
+                  <input type="tel" class="form-control" id="phone" name="phone" value="<%= formData.phone || '' %>" placeholder="+91 98765 43210">
+                </div>
+
+                <div class="mb-3">
+                  <label for="password" class="form-label small fw-semibold">Initial Account Password *</label>
+                  <input type="password" class="form-control" id="password" name="password" minlength="6" placeholder="Minimum 6 characters" required>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Granular Permission Matrix -->
+          <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-shield-lock text-warning me-2"></i> Assign Operational Permissions</h6>
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-sm btn-outline-primary" id="selectAllPermsBtn" style="font-size: 0.75rem;">Select All</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" id="clearAllPermsBtn" style="font-size: 0.75rem;">Clear All</button>
+                </div>
+              </div>
+              <div class="card-body p-4">
+                <p class="text-muted small mb-4">
+                  Check each granular permission to grant this employee access. Unchecked modules will be completely inaccessible (403 Forbidden).
+                </p>
+
+                <% for (const [category, perms] of Object.entries(groupedPermissions)) { %>
+                  <div class="mb-4 pb-3 border-bottom">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <h6 class="fw-bold text-dark font-serif mb-0"><%= category %></h6>
+                      <span class="badge bg-light text-secondary border font-sans" style="font-size: 0.7rem;"><%= perms.length %> permissions</span>
+                    </div>
+
+                    <div class="row g-2">
+                      <% perms.forEach(function(p) { %>
+                        <div class="col-md-6">
+                          <div class="form-check p-2 rounded bg-light border">
+                            <input class="form-check-input perm-checkbox ms-1 me-2" type="checkbox" name="permissions" value="<%= p.key %>" id="perm_<%= p.key %>">
+                            <label class="form-check-label small fw-medium" for="perm_<%= p.key %>">
+                              <%= p.name %>
+                              <div class="text-muted" style="font-size: 0.7rem;"><%= p.desc %></div>
+                            </label>
+                          </div>
+                        </div>
+                      <% }); %>
+                    </div>
+                  </div>
+                <% } %>
+
+                <div class="d-flex justify-content-end gap-3 mt-4">
+                  <a href="/admin/employees" class="btn btn-outline-secondary px-4">Cancel</a>
+                  <button type="submit" class="btn btn-primary px-5 fw-bold">
+                    <i class="bi bi-check2-circle me-1"></i> Create Staff Member
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
+</div>
+
+<script>
+  document.getElementById('selectAllPermsBtn').addEventListener('click', () => {
+    document.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = true);
+  });
+  document.getElementById('clearAllPermsBtn').addEventListener('click', () => {
+    document.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = false);
+  });
+</script>
+
+<%- include('../../partials/footer.html') %>

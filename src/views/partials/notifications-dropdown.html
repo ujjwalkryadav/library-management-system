@@ -1,0 +1,90 @@
+<div class="dropdown">
+  <button class="nav-notif-btn dropdown-toggle border-0 bg-transparent" type="button" id="notifDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Notifications">
+    <i class="bi bi-bell"></i>
+    <% if (typeof unreadNotificationCount !== 'undefined' && unreadNotificationCount > 0) { %>
+      <span id="notifBadge" class="badge bg-danger nav-notif-badge">
+        <%= unreadNotificationCount %>
+      </span>
+    <% } %>
+  </button>
+
+  <div class="dropdown-menu dropdown-menu-end notif-dropdown-popup shadow-lg border-0 p-0" aria-labelledby="notifDropdownBtn" style="width: 360px; max-width: 92vw; border-radius: 12px; overflow: hidden; z-index: 1060;">
+    <!-- Header -->
+    <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+      <div class="d-flex align-items-center gap-2">
+        <h6 class="mb-0 fw-bold text-dark font-serif" style="font-size: 0.95rem;">
+          <i class="bi bi-bell-fill text-warning me-1"></i> Notifications
+        </h6>
+        <% if (typeof unreadNotificationCount !== 'undefined' && unreadNotificationCount > 0) { %>
+          <span class="badge bg-danger rounded-pill" style="font-size: 0.68rem;"><%= unreadNotificationCount %> new</span>
+        <% } %>
+      </div>
+      <% if (typeof unreadNotificationCount !== 'undefined' && unreadNotificationCount > 0) { %>
+        <form action="/notifications/mark-all-read" method="POST" class="m-0" id="markAllReadForm">
+          <button type="submit" class="btn btn-link p-0 text-primary text-decoration-none small fw-semibold" style="font-size: 0.75rem;">
+            Mark all read
+          </button>
+        </form>
+      <% } %>
+    </div>
+
+    <!-- Notification Items List -->
+    <div class="notif-items-list" style="max-height: 330px; overflow-y: auto;">
+      <% if (typeof recentNotifications !== 'undefined' && recentNotifications && recentNotifications.length > 0) { %>
+        <% recentNotifications.forEach(function(n) { %>
+          <div class="p-3 border-bottom notif-item transition-all <%= !n.is_read ? 'bg-light bg-opacity-75' : 'bg-white' %>" style="transition: background-color 0.2s ease;">
+            <div class="d-flex gap-2 align-items-start">
+              <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-1" style="width: 32px; height: 32px; font-size: 0.9rem; background: <%= (!n.is_read) ? 'rgba(22, 78, 61, 0.12)' : 'rgba(108, 117, 125, 0.1)' %>;">
+                <% if (n.type === 'BOOK_OVERDUE' || n.type === 'FINE') { %>
+                  <i class="bi bi-exclamation-octagon-fill text-danger"></i>
+                <% } else if (n.type === 'BOOK_REQUEST' || n.type === 'REQUEST_APPROVED') { %>
+                  <i class="bi bi-journal-check text-success"></i>
+                <% } else if (n.type === 'REQUEST_REJECTED') { %>
+                  <i class="bi bi-x-circle-fill text-danger"></i>
+                <% } else { %>
+                  <i class="bi bi-bell-fill text-primary"></i>
+                <% } %>
+              </div>
+
+              <div class="flex-grow-1 min-w-0">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="text-dark small fw-bold text-truncate pe-1"><%= n.title %></span>
+                  <% if (!n.is_read) { %>
+                    <span class="badge bg-primary rounded-pill flex-shrink-0" style="font-size: 0.58rem; padding: 2px 6px;">NEW</span>
+                  <% } %>
+                </div>
+                <p class="text-secondary mb-1" style="font-size: 0.78rem; line-height: 1.35;"><%= n.message %></p>
+                <div class="d-flex justify-content-between align-items-center pt-1">
+                  <span class="text-muted" style="font-size: 0.68rem;">
+                    <i class="bi bi-clock me-1"></i><%= helpers.formatDate(n.created_at) %>
+                  </span>
+                  <% if (!n.is_read) { %>
+                    <form action="/notifications/<%= n.id %>/read" method="POST" class="m-0 d-inline">
+                      <button type="submit" class="btn btn-link p-0 text-secondary text-decoration-none" style="font-size: 0.7rem;">
+                        <i class="bi bi-check-all me-1"></i>Mark read
+                      </button>
+                    </form>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <div class="p-4 text-center text-muted bg-white">
+          <i class="bi bi-bell-slash fs-2 d-block mb-1 text-secondary opacity-50"></i>
+          <div class="small fw-medium">No notifications yet</div>
+          <div class="text-muted" style="font-size: 0.72rem;">You're all caught up!</div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Footer: See All Full Page Link -->
+    <div class="p-2 text-center bg-light border-top">
+      <a href="/notifications" class="btn btn-sm btn-primary w-100 fw-bold py-2 d-flex align-items-center justify-content-center gap-1" style="font-size: 0.8rem; border-radius: 8px;">
+        <span>See All Notifications</span>
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</div>

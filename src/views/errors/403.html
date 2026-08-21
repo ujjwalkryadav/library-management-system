@@ -1,0 +1,18 @@
+<%- include('../partials/head.html') %>
+<%- include('../partials/navbar.html') %>
+
+<main class="container my-5 flex-grow-1 d-flex align-items-center justify-content-center">
+  <div class="text-center py-5">
+    <div class="display-1 fw-bold text-danger mb-2">403</div>
+    <h3 class="fw-bold mb-3">Access Denied / Forbidden</h3>
+    <p class="text-muted mb-4 fs-6" style="max-width: 500px; margin: 0 auto;">
+      <%= typeof message !== 'undefined' ? message : 'You do not have the required permissions or role to access this protected area.' %>
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="/" class="btn btn-primary px-4"><i class="bi bi-house me-1"></i> Return Home</a>
+      <a href="/login" class="btn btn-outline-secondary px-4"><i class="bi bi-box-arrow-in-right me-1"></i> Sign In With Another Account</a>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer.html') %>

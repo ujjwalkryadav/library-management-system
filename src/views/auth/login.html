@@ -1,0 +1,260 @@
+<%- include('../partials/head.html') %>
+
+<main class="login-page-wrapper">
+  <!-- Dynamic Ambient Glow Backdrops -->
+  <div class="login-bg-mesh"></div>
+  <div class="login-orb login-orb-primary"></div>
+  <div class="login-orb login-orb-accent"></div>
+  <div class="login-orb login-orb-tertiary"></div>
+
+  <div class="container py-4 position-relative z-1 d-flex flex-column align-items-center justify-content-center min-vh-100">
+    
+    <!-- Central Luxury Login Card -->
+    <div class="login-glass-card">
+      
+      <!-- Top Brand Header -->
+      <div class="text-center mb-4">
+        <a href="/" class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white bg-opacity-90 shadow-sm border mb-3 text-decoration-none hover-scale">
+          <img src="/images/logo.svg" alt="Logo" width="22" height="22">
+          <span class="fw-bold text-dark font-serif" style="font-size: 0.85rem;"><%= systemSettings ? systemSettings.library_name : 'Library Management System' %></span>
+        </a>
+
+        <div class="login-dynamic-badge mb-2" id="roleBadgeContainer">
+          <i class="bi bi-mortarboard-fill" id="roleBadgeIcon"></i>
+        </div>
+
+        <h3 class="fw-bold font-serif text-dark mb-1" id="loginHeaderTitle">Student Portal Login</h3>
+        <p class="text-muted small mb-0" id="loginHeaderSubtitle">Access catalog, borrowed books, reservations & fees</p>
+      </div>
+
+      <!-- Segmented Role Selector Tabs -->
+      <% const currentRole = typeof selectedRole !== 'undefined' ? selectedRole.toLowerCase() : 'student'; %>
+      <div class="role-segmented-control mb-3" id="roleSelectorNav">
+        <button type="button" class="role-tab-btn <%= currentRole === 'student' ? 'active' : '' %>" data-role="student" data-title="Student Portal Login" data-subtitle="Access catalog, borrowed books, reservations & fees" data-icon="bi-mortarboard-fill">
+          <i class="bi bi-mortarboard"></i>
+          <span>Student</span>
+        </button>
+        <button type="button" class="role-tab-btn <%= currentRole === 'employee' ? 'active' : '' %>" data-role="employee" data-title="Staff Operations Login" data-subtitle="Circulation desk, issue processing & inventory operations" data-icon="bi-person-badge-fill">
+          <i class="bi bi-person-badge"></i>
+          <span>Staff</span>
+        </button>
+        <button type="button" class="role-tab-btn <%= currentRole === 'admin' ? 'active' : '' %>" data-role="admin" data-title="Admin Console Login" data-subtitle="System policies, staff management & institutional ledger" data-icon="bi-shield-lock-fill">
+          <i class="bi bi-shield-lock"></i>
+          <span>Admin</span>
+        </button>
+      </div>
+
+      <!-- 1-Click Quick Demo Account Fillers -->
+      <div class="demo-accounts-bar mb-3 p-2 rounded-3 bg-light border d-flex flex-wrap align-items-center justify-content-between gap-1">
+        <span class="small fw-bold text-muted ps-1" style="font-size: 0.72rem;">
+          <i class="bi bi-lightning-charge-fill text-warning"></i> 1-Click Demo:
+        </span>
+        <div class="d-flex gap-1">
+          <button type="button" class="btn btn-xs btn-outline-dark demo-fill-btn py-0 px-2 rounded-pill" data-role="student" data-email="student1@college.edu" data-pass="Student123!" style="font-size: 0.72rem;">
+            🎓 Student
+          </button>
+          <button type="button" class="btn btn-xs btn-outline-dark demo-fill-btn py-0 px-2 rounded-pill" data-role="employee" data-email="employee@library.local" data-pass="Employee123!" style="font-size: 0.72rem;">
+            💼 Staff
+          </button>
+          <button type="button" class="btn btn-xs btn-outline-dark demo-fill-btn py-0 px-2 rounded-pill" data-role="admin" data-email="admin@library.local" data-pass="ChangeThisPassword123!" style="font-size: 0.72rem;">
+            🛡️ Admin
+          </button>
+        </div>
+      </div>
+
+      <%- include('../partials/alerts.html') %>
+
+      <!-- Authentication Form -->
+      <form action="/login" method="POST" id="loginForm" class="needs-validation" novalidate>
+        <input type="hidden" name="role" id="roleInput" value="<%= currentRole %>">
+
+        <!-- Email Field -->
+        <div class="mb-3">
+          <label for="email" class="form-label small fw-bold text-dark mb-1">Institutional Email / Username</label>
+          <div class="input-group modern-input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-envelope text-muted"></i></span>
+            <input type="email" class="form-control font-sans" id="email" name="email" value="<%= typeof email !== 'undefined' ? email : '' %>" placeholder="name@college.edu or username" required autofocus>
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label for="password" class="form-label small fw-bold text-dark mb-0">Password</label>
+            <a href="#" class="small text-muted text-decoration-none hover-primary" onclick="alert('Contact the Central Library Administrator to reset password.'); return false;" style="font-size: 0.75rem;">Forgot Password?</a>
+          </div>
+          <div class="input-group modern-input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-lock text-muted"></i></span>
+            <input type="password" class="form-control font-sans" id="password" name="password" placeholder="Enter your account password" required>
+            <button class="btn btn-white bg-white border-start-0 border" type="button" id="togglePasswordBtn">
+              <i class="bi bi-eye text-muted" id="togglePasswordIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Remember Me Checkbox -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="rememberMe" checked>
+            <label class="form-check-label small text-muted" for="rememberMe" style="font-size: 0.78rem;">
+              Keep me signed in on this device
+            </label>
+          </div>
+        </div>
+
+        <!-- Animated Shimmer Submit Button -->
+        <button type="submit" class="btn btn-primary w-100 py-2 fs-6 fw-bold login-btn-shine d-flex align-items-center justify-content-center gap-2 shadow" id="submitBtn">
+          <i class="bi bi-box-arrow-in-right"></i>
+          <span id="btnText">Sign In to Dashboard</span>
+        </button>
+      </form>
+
+      <!-- Bottom Registration & Catalog Navigation -->
+      <div class="text-center pt-3 mt-4 border-top">
+        <div id="registerSection" class="<%= currentRole === 'student' ? '' : 'd-none' %>">
+          <p class="small text-muted mb-2">
+            New student? 
+            <a href="/register" class="fw-bold text-primary text-decoration-none hover-underline">Register Account Here &rarr;</a>
+          </p>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-center gap-3 mt-1">
+          <a href="/" class="small text-muted text-decoration-none hover-primary d-inline-flex align-items-center gap-1">
+            <i class="bi bi-house"></i> Home
+          </a>
+          <span class="text-muted small">&bull;</span>
+          <a href="/books" class="small text-muted text-decoration-none hover-primary d-inline-flex align-items-center gap-1">
+            <i class="bi bi-book"></i> Public Catalog
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+  // Dynamic Role Switcher Logic
+  const roleTabs = document.querySelectorAll('.role-tab-btn');
+  const roleInput = document.getElementById('roleInput');
+  const roleBadgeIcon = document.getElementById('roleBadgeIcon');
+  const roleBadgeContainer = document.getElementById('roleBadgeContainer');
+  const headerTitle = document.getElementById('loginHeaderTitle');
+  const headerSubtitle = document.getElementById('loginHeaderSubtitle');
+  const registerSection = document.getElementById('registerSection');
+
+  const roleConfig = {
+    student: {
+      title: 'Student Portal Login',
+      subtitle: 'Access catalog, borrowed books, reservations & fees',
+      icon: 'bi-mortarboard-fill',
+      gradient: 'linear-gradient(135deg, #164E3D 0%, #0B291E 100%)',
+      color: '#C89D5C'
+    },
+    employee: {
+      title: 'Staff Operations Login',
+      subtitle: 'Circulation desk, issue processing & inventory operations',
+      icon: 'bi-person-badge-fill',
+      gradient: 'linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%)',
+      color: '#60A5FA'
+    },
+    admin: {
+      title: 'Admin Console Login',
+      subtitle: 'System policies, staff management & institutional ledger',
+      icon: 'bi-shield-lock-fill',
+      gradient: 'linear-gradient(135deg, #991B1B 0%, #450A0A 100%)',
+      color: '#F87171'
+    }
+  };
+
+  function applyRoleTheme(role) {
+    const config = roleConfig[role] || roleConfig.student;
+    roleInput.value = role;
+
+    // Update Tab Classes
+    roleTabs.forEach(tab => {
+      if (tab.getAttribute('data-role') === role) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+
+    // Badge Animation
+    roleBadgeContainer.style.transform = 'scale(0.7) rotate(-15deg)';
+    roleBadgeContainer.style.opacity = '0.5';
+
+    setTimeout(() => {
+      roleBadgeIcon.className = `bi ${config.icon}`;
+      roleBadgeContainer.style.background = config.gradient;
+      roleBadgeContainer.style.color = config.color;
+      headerTitle.textContent = config.title;
+      headerSubtitle.textContent = config.subtitle;
+
+      roleBadgeContainer.style.transform = 'scale(1) rotate(0deg)';
+      roleBadgeContainer.style.opacity = '1';
+    }, 150);
+
+    if (role === 'student') {
+      registerSection.classList.remove('d-none');
+    } else {
+      registerSection.classList.add('d-none');
+    }
+  }
+
+  roleTabs.forEach(tab => {
+    tab.addEventListener('click', function () {
+      const role = this.getAttribute('data-role');
+      applyRoleTheme(role);
+    });
+  });
+
+  // 1-Click Quick Demo Account Auto-Filler
+  document.querySelectorAll('.demo-fill-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const role = this.getAttribute('data-role');
+      const email = this.getAttribute('data-email');
+      const pass = this.getAttribute('data-pass');
+
+      applyRoleTheme(role);
+
+      const emailField = document.getElementById('email');
+      const passField = document.getElementById('password');
+
+      emailField.value = email;
+      passField.value = pass;
+
+      // Pulse visual highlight
+      emailField.classList.add('bg-warning', 'bg-opacity-10');
+      passField.classList.add('bg-warning', 'bg-opacity-10');
+
+      setTimeout(() => {
+        emailField.classList.remove('bg-warning', 'bg-opacity-10');
+        passField.classList.remove('bg-warning', 'bg-opacity-10');
+      }, 500);
+    });
+  });
+
+  // Password Visibility Toggle
+  const toggleBtn = document.getElementById('togglePasswordBtn');
+  const passwordInput = document.getElementById('password');
+  const toggleIcon = document.getElementById('togglePasswordIcon');
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const isPass = passwordInput.getAttribute('type') === 'password';
+      passwordInput.setAttribute('type', isPass ? 'text' : 'password');
+      toggleIcon.className = isPass ? 'bi bi-eye-slash text-muted' : 'bi bi-eye text-muted';
+    });
+  }
+
+  // Form Submit Feedback
+  document.getElementById('loginForm').addEventListener('submit', function () {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.style.opacity = '0.85';
+    document.getElementById('btnText').textContent = 'Authenticating...';
+  });
+</script>
+
+<%- include('../partials/footer.html') %>

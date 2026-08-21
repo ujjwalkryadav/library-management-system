@@ -1,0 +1,77 @@
+<%- include('../partials/head.html') %>
+<%- include('../partials/navbar.html') %>
+
+<main class="container my-4 flex-grow-1">
+  <%- include('../partials/alerts.html') %>
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">My Book Issue Requests</h2>
+      <p class="text-muted mb-0">Track the status of your submitted book reservations and librarian reviews.</p>
+    </div>
+    <div>
+      <a href="/books" class="btn btn-primary d-flex align-items-center gap-2">
+        <i class="bi bi-search"></i> Browse Catalog
+      </a>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <% if (requests && requests.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Book Requested</th>
+                <th>Author & Category</th>
+                <th>Request Date</th>
+                <th>Status</th>
+                <th>Reviewed By / Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% requests.forEach(function(r) { %>
+                <tr>
+                  <td>
+                    <a href="/books/<%= r.book.id %>" class="fw-bold text-dark text-decoration-none"><%= r.book.title %></a>
+                  </td>
+                  <td>
+                    <span class="text-muted"><%= r.book.author.name %></span>
+                    <span class="badge bg-light text-secondary border ms-1"><%= r.book.category.name %></span>
+                  </td>
+                  <td><%= r.request_date.toLocaleDateString() %></td>
+                  <td>
+                    <% const badge = helpers.getStatusBadge(r.status); %>
+                    <span class="badge <%= badge.class %>"><%= badge.label %></span>
+                  </td>
+                  <td>
+                    <% if (r.status === 'APPROVED') { %>
+                      <span class="text-success small"><i class="bi bi-check-circle me-1"></i> Approved by Librarian</span>
+                    <% } else if (r.status === 'REJECTED') { %>
+                      <span class="text-danger small">Declined: <%= r.rejection_reason || 'No specific reason provided' %></span>
+                    <% } else { %>
+                      <span class="text-warning small"><i class="bi bi-hourglass-split me-1"></i> In Librarian Queue</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+          <h5 class="fw-bold">No active requests</h5>
+          <p class="text-muted mb-3">You haven't requested any books recently.</p>
+          <a href="/books" class="btn btn-primary">Find a Book to Request</a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('../partials/pagination.html') %>
+
+</main>
+
+<%- include('../partials/footer.html') %>

@@ -1,0 +1,116 @@
+<%- include('../../partials/head.html') %>
+
+<div class="admin-layout">
+  <%- include('../../partials/sidebar.html') %>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-light d-lg-none border" type="button" id="sidebarToggleBtn">
+          <i class="bi bi-list"></i>
+        </button>
+        <a href="/books" class="text-decoration-none text-muted small"><i class="bi bi-arrow-left me-1"></i> Back to Catalog</a>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <% if (hasPermission('books.edit')) { %>
+          <a href="/books/admin/<%= book.id %>/edit" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-pencil me-1"></i> Edit Details
+          </a>
+        <% } %>
+        <% if (hasPermission('issues.create') && book.available_copies > 0) { %>
+          <a href="/issues/admin/create?bookId=<%= book.id %>" class="btn btn-primary btn-sm">
+            <i class="bi bi-journal-plus me-1"></i> Direct Issue
+          </a>
+        <% } %>
+      </div>
+    </header>
+
+    <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
+      <%- include('../../partials/alerts.html') %>
+
+      <div class="row g-4">
+        <!-- Main Book Profile -->
+        <div class="col-lg-8">
+          <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+              <div class="row g-4">
+                <div class="col-md-4 text-center">
+                  <img src="<%= book.cover_image || '/images/default-cover.svg' %>" alt="<%= book.title %>" class="img-fluid rounded-3 shadow border mb-3" style="max-height: 250px;">
+                  <div>
+                    <% if (book.available_copies > 0) { %>
+                      <span class="badge badge-active fs-6 py-2 px-3"><i class="bi bi-check-circle me-1"></i> <%= book.available_copies %> in Stock</span>
+                    <% } else { %>
+                      <span class="badge badge-overdue fs-6 py-2 px-3"><i class="bi bi-x-circle me-1"></i> 0 Available</span>
+                    <% } %>
+                  </div>
+                </div>
+
+                <div class="col-md-8">
+                  <div class="mb-2">
+                    <span class="badge bg-light text-secondary border me-2"><%= book.category.name %></span>
+                    <span class="badge bg-light text-dark border font-monospace"><%= book.shelf_location ? 'Shelf: ' + book.shelf_location : 'Stacks' %></span>
+                  </div>
+
+                  <h3 class="fw-bold font-serif text-dark mb-1"><%= book.title %></h3>
+                  <p class="text-muted small mb-3">By <strong class="text-dark"><%= book.author.name %></strong></p>
+
+                  <div class="row g-2 mb-3 small text-muted">
+                    <div class="col-sm-6"><strong>ISBN:</strong> <span class="font-monospace text-dark"><%= book.isbn || 'N/A' %></span></div>
+                    <div class="col-sm-6"><strong>Publisher:</strong> <span class="text-dark"><%= book.publisher || 'Academic Press' %></span></div>
+                    <div class="col-sm-6"><strong>Year of Publication:</strong> <span class="text-dark"><%= book.publication_year || 'N/A' %></span></div>
+                    <div class="col-sm-6"><strong>Language:</strong> <span class="text-dark"><%= book.language %></span></div>
+                    <div class="col-sm-6"><strong>Total Library Copies:</strong> <span class="text-dark"><%= book.total_copies %></span></div>
+                    <div class="col-sm-6"><strong>Available for Issue:</strong> <span class="text-dark"><%= book.available_copies %></span></div>
+                  </div>
+
+                  <h6 class="fw-bold text-dark border-top pt-3 mb-2 font-serif">Overview & Description</h6>
+                  <p class="text-secondary small leading-relaxed mb-0"><%= book.description || 'No overview provided.' %></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Circulation Details & Danger Zone -->
+        <div class="col-lg-4">
+          <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-white">
+              <h6 class="mb-0 fw-bold font-serif"><i class="bi bi-journal-bookmark text-primary me-2"></i> Circulation Summary</h6>
+            </div>
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between py-2 border-bottom small">
+                <span class="text-muted">Total Copies:</span>
+                <span class="fw-bold text-dark"><%= book.total_copies %></span>
+              </div>
+              <div class="d-flex justify-content-between py-2 border-bottom small">
+                <span class="text-muted">Currently Issued:</span>
+                <span class="fw-bold text-primary"><%= book.total_copies - book.available_copies %></span>
+              </div>
+              <div class="d-flex justify-content-between py-2 small">
+                <span class="text-muted">Available on Shelf:</span>
+                <span class="fw-bold text-success"><%= book.available_copies %></span>
+              </div>
+            </div>
+          </div>
+
+          <% if (hasPermission('books.delete')) { %>
+            <div class="card border-0 shadow-sm rounded-4 bg-light">
+              <div class="card-body p-3">
+                <div class="fw-bold text-danger small mb-1">Archive or Remove Title</div>
+                <p class="text-muted" style="font-size: 0.72rem;">Books with active issue records cannot be deleted until all copies are returned.</p>
+                <form action="/books/admin/<%= book.id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete or archive this book title?');">
+                  <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                    <i class="bi bi-trash me-1"></i> Delete / Archive Book
+                  </button>
+                </form>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../../partials/footer.html') %>

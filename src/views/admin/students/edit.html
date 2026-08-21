@@ -1,0 +1,80 @@
+<%- include('../../partials/head.html') %>
+
+<div class="admin-wrapper">
+  <%- include('../../partials/sidebar.html') %>
+
+  <div class="admin-content">
+    <%- include('../../partials/navbar.html') %>
+
+    <main class="admin-main-body">
+      <%- include('../../partials/alerts.html') %>
+
+      <div class="mb-4">
+        <a href="/admin/students/<%= student.id %>" class="text-decoration-none text-muted small"><i class="bi bi-arrow-left me-1"></i> Back to Student Profile</a>
+        <h2 class="fw-bold mt-1">Edit Student: <%= student.user.name %></h2>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-4 p-md-5">
+          <form action="/admin/students/<%= student.id %>/update" method="POST">
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label for="name" class="form-label fw-semibold">Student Full Name</label>
+                <input type="text" class="form-control" id="name" name="name" value="<%= student.user.name %>" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="phone" class="form-label fw-semibold">Phone Number</label>
+                <input type="tel" class="form-control" id="phone" name="phone" value="<%= student.user.phone || '' %>">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Student ID / Roll No.</label>
+                <input type="text" class="form-control bg-light" value="<%= student.student_id %>" disabled>
+                <div class="form-text">System ID cannot be changed.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Academic Email</label>
+                <input type="email" class="form-control bg-light" value="<%= student.user.email %>" disabled>
+              </div>
+
+              <div class="col-md-6">
+                <label for="department" class="form-label fw-semibold">Department</label>
+                <input type="text" class="form-control" id="department" name="department" value="<%= student.department %>" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="course" class="form-label fw-semibold">Course / Degree Program</label>
+                <input type="text" class="form-control" id="course" name="course" value="<%= student.course %>" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="semester" class="form-label fw-semibold">Semester</label>
+                <input type="text" class="form-control" id="semester" name="semester" value="<%= student.semester || '' %>">
+              </div>
+
+              <div class="col-md-6">
+                <label for="year" class="form-label fw-semibold">Academic Year</label>
+                <input type="text" class="form-control" id="year" name="year" value="<%= student.year || '' %>">
+              </div>
+
+              <div class="col-12">
+                <label for="address" class="form-label fw-semibold">Campus Address</label>
+                <textarea class="form-control" id="address" name="address" rows="2"><%= student.address || '' %></textarea>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+              <a href="/admin/students/<%= student.id %>" class="btn btn-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-lg me-1"></i> Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </main>
+
+    <%- include('../../partials/footer.html') %>
+  </div>
+</div>

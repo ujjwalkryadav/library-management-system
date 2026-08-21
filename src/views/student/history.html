@@ -1,0 +1,72 @@
+<%- include('../partials/head.html') %>
+<%- include('../partials/navbar.html') %>
+
+<main class="container my-4 flex-grow-1">
+  <%- include('../partials/alerts.html') %>
+
+  <div class="mb-4">
+    <h2 class="fw-bold mb-1">My Borrowing History</h2>
+    <p class="text-muted mb-0">Record of all books previously borrowed and returned to the university library.</p>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <% if (history && history.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Book Title</th>
+                <th>Author</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Returned Date</th>
+                <th>Settlement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% history.forEach(function(h) { %>
+                <tr>
+                  <td>
+                    <a href="/books/<%= h.book.id %>" class="fw-bold text-dark text-decoration-none"><%= h.book.title %></a>
+                    <div class="small text-muted font-monospace"><%= h.book.isbn ? 'ISBN: ' + h.book.isbn : '' %></div>
+                  </td>
+                  <td class="text-muted"><%= h.book.author.name %></td>
+                  <td><%= h.issue_date.toLocaleDateString() %></td>
+                  <td><%= h.due_date.toLocaleDateString() %></td>
+                  <td>
+                    <span class="badge bg-success-subtle text-success">
+                      <i class="bi bi-check2-circle me-1"></i> <%= h.returned_date ? h.returned_date.toLocaleDateString() : 'Returned' %>
+                    </span>
+                  </td>
+                  <td>
+                    <% if (h.fines && h.fines.length > 0) { %>
+                      <% h.fines.forEach(function(f) { %>
+                        <span class="badge <%= f.status === 'PAID' ? 'bg-success' : (f.status === 'UNPAID' ? 'bg-danger' : 'bg-secondary') %>">
+                          $<%= Number(f.amount).toFixed(2) %> (<%= f.status %>)
+                        </span>
+                      <% }); %>
+                    <% } else { %>
+                      <span class="badge bg-light text-muted border">No Fines</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-clock-history fs-1 d-block mb-2 text-secondary"></i>
+          <h5 class="fw-bold">No returned books yet</h5>
+          <p class="text-muted">Your past returned books and transactions will appear here.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('../partials/pagination.html') %>
+
+</main>
+
+<%- include('../partials/footer.html') %>

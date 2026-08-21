@@ -1,0 +1,102 @@
+<%- include('../../partials/head.html') %>
+
+<div class="admin-wrapper">
+  <%- include('../../partials/sidebar.html') %>
+
+  <div class="admin-content">
+    <%- include('../../partials/navbar.html') %>
+
+    <main class="admin-main-body">
+      <%- include('../../partials/alerts.html') %>
+
+      <div class="mb-4">
+        <a href="/books" class="text-decoration-none text-muted small"><i class="bi bi-arrow-left me-1"></i> Back to Books Catalog</a>
+        <h2 class="fw-bold mt-1">Add New Book to Catalog</h2>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-4 p-md-5">
+          <form action="/books/admin/create" method="POST" enctype="multipart/form-data">
+            <div class="row g-3 mb-4">
+              <div class="col-md-8">
+                <label for="title" class="form-label fw-semibold">Book Title <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="title" name="title" value="<%= typeof formData !== 'undefined' && formData.title ? formData.title : '' %>" placeholder="e.g. Introduction to Algorithms" required>
+              </div>
+
+              <div class="col-md-4">
+                <label for="isbn" class="form-label fw-semibold">ISBN (10 or 13 digits)</label>
+                <input type="text" class="form-control font-monospace" id="isbn" name="isbn" value="<%= typeof formData !== 'undefined' && formData.isbn ? formData.isbn : '' %>" placeholder="e.g. 9780262033848">
+              </div>
+
+              <div class="col-md-6">
+                <label for="authorId" class="form-label fw-semibold">Author <span class="text-danger">*</span></label>
+                <select class="form-select" id="authorId" name="authorId" required>
+                  <option value="">Select Author...</option>
+                  <% authors.forEach(function(a) { %>
+                    <option value="<%= a.id %>" <%= typeof formData !== 'undefined' && formData.authorId == a.id ? 'selected' : '' %>><%= a.name %></option>
+                  <% }); %>
+                </select>
+                <div class="form-text">Author not listed? <a href="/admin/authors" target="_blank">Add new author</a>.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="categoryId" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                <select class="form-select" id="categoryId" name="categoryId" required>
+                  <option value="">Select Category...</option>
+                  <% categories.forEach(function(c) { %>
+                    <option value="<%= c.id %>" <%= typeof formData !== 'undefined' && formData.categoryId == c.id ? 'selected' : '' %>><%= c.name %></option>
+                  <% }); %>
+                </select>
+                <div class="form-text">Category not listed? <a href="/admin/categories" target="_blank">Add category</a>.</div>
+              </div>
+
+              <div class="col-md-4">
+                <label for="publisher" class="form-label fw-semibold">Publisher</label>
+                <input type="text" class="form-control" id="publisher" name="publisher" value="<%= typeof formData !== 'undefined' && formData.publisher ? formData.publisher : '' %>" placeholder="e.g. MIT Press">
+              </div>
+
+              <div class="col-md-4">
+                <label for="publicationYear" class="form-label fw-semibold">Publication Year</label>
+                <input type="number" class="form-control" id="publicationYear" name="publicationYear" value="<%= typeof formData !== 'undefined' && formData.publicationYear ? formData.publicationYear : '' %>" placeholder="e.g. 2022" min="1500" max="2100">
+              </div>
+
+              <div class="col-md-4">
+                <label for="language" class="form-label fw-semibold">Language</label>
+                <input type="text" class="form-control" id="language" name="language" value="<%= typeof formData !== 'undefined' && formData.language ? formData.language : 'English' %>">
+              </div>
+
+              <div class="col-md-4">
+                <label for="totalCopies" class="form-label fw-semibold">Total Physical Copies <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="totalCopies" name="totalCopies" value="<%= typeof formData !== 'undefined' && formData.totalCopies ? formData.totalCopies : '1' %>" min="1" required>
+                <div class="form-text">Available copies will initialize to this amount.</div>
+              </div>
+
+              <div class="col-md-4">
+                <label for="shelfLocation" class="form-label fw-semibold">Shelf / Bay Location</label>
+                <input type="text" class="form-control font-monospace" id="shelfLocation" name="shelfLocation" value="<%= typeof formData !== 'undefined' && formData.shelfLocation ? formData.shelfLocation : '' %>" placeholder="e.g. CS-A3-12">
+              </div>
+
+              <div class="col-md-4">
+                <label for="coverImage" class="form-label fw-semibold">Book Cover Image</label>
+                <input type="file" class="form-control" id="coverImage" name="coverImage" accept="image/png, image/jpeg, image/webp">
+                <div class="form-text">Max 3MB (JPG, PNG, WEBP). Optional.</div>
+              </div>
+
+              <div class="col-12">
+                <label for="description" class="form-label fw-semibold">Book Description / Abstract</label>
+                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Enter book summary or topics covered..."><%= typeof formData !== 'undefined' && formData.description ? formData.description : '' %></textarea>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+              <a href="/books" class="btn btn-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-lg me-1"></i> Save Book to Inventory</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <%- include('../../partials/footer.html') %>
+  </div>
+</div>

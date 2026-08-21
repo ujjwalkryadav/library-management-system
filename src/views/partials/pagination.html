@@ -1,0 +1,27 @@
+<% if (typeof pagination !== 'undefined' && pagination && pagination.totalPages > 1) { %>
+  <nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <li class="page-item <%= !pagination.hasPrev ? 'disabled' : '' %>">
+        <a class="page-link" href="<%= pagination.prevUrl || '#' %>" tabindex="-1" aria-disabled="<%= !pagination.hasPrev %>">
+          <i class="bi bi-chevron-left"></i> Previous
+        </a>
+      </li>
+
+      <% pagination.range.forEach(function(p) { %>
+        <% if (p === '...') { %>
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+        <% } else { %>
+          <li class="page-item <%= p === pagination.currentPage ? 'active' : '' %>">
+            <a class="page-link" href="<%= pagination.getPageUrl(p) %>"><%= p %></a>
+          </li>
+        <% } %>
+      <% }); %>
+
+      <li class="page-item <%= !pagination.hasNext ? 'disabled' : '' %>">
+        <a class="page-link" href="<%= pagination.nextUrl || '#' %>">
+          Next <i class="bi bi-chevron-right"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+<% } %>

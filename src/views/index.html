@@ -1,0 +1,306 @@
+<%- include('partials/head.html') %>
+<%- include('partials/navbar.html') %>
+
+<main class="flex-grow-1 w-100">
+  <%- include('partials/alerts.html') %>
+
+  <!-- ======================================================== -->
+  <!-- 1. HERO SECTION (Matching Reference Image 1)             -->
+  <!-- ======================================================== -->
+  <section class="hero-section position-relative py-5" style="background: linear-gradient(135deg, #FBF8F2 0%, #F4EFE6 100%);">
+    <div class="container py-lg-4">
+      <div class="row align-items-center g-5">
+        <!-- Left Content Column -->
+        <div class="col-lg-6 animate-slide-left">
+          <div class="d-inline-flex align-items-center gap-2 mb-3 px-3 py-1 bg-white rounded-pill shadow-sm border">
+            <i class="bi bi-book-half text-warning fs-5"></i>
+            <span class="text-uppercase fw-bold text-dark" style="letter-spacing: 0.12em; font-size: 0.75rem;">Central Institutional Archive</span>
+          </div>
+
+          <h1 class="display-3 fw-bold text-dark mb-3 font-serif lh-sm">
+            Discover Knowledge.<br>
+            <span class="fst-italic text-primary">Empower Yourself.</span>
+          </h1>
+
+          <p class="lead text-secondary mb-4 fs-6" style="max-width: 520px; line-height: 1.7;">
+            Welcome to <%= systemSettings ? systemSettings.library_name : 'Library Management System' %> &ndash; your gateway to thousands of curated books, endless learning, and a brighter future.
+          </p>
+
+          <div class="d-flex flex-wrap gap-3 mb-4">
+            <a href="/books" class="btn btn-primary d-inline-flex align-items-center gap-2 px-4 py-3 fs-6 shadow">
+              <i class="bi bi-journal-bookmark"></i> Explore Books
+            </a>
+            <a href="/login?role=student" class="btn btn-outline-dark bg-white d-inline-flex align-items-center gap-2 px-4 py-3 fs-6 border shadow-sm">
+              <i class="bi bi-mortarboard"></i> Student Login
+            </a>
+          </div>
+        </div>
+
+        <!-- Right Visual & Floating Quote Column -->
+        <div class="col-lg-6 animate-slide-right">
+          <div class="position-relative">
+            <!-- Atmospheric Library Image -->
+            <div class="rounded-4 overflow-hidden shadow-lg border" style="max-height: 380px; background-color: #0F382A;">
+              <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=900&q=80" alt="Library Hall" class="img-fluid w-100 object-fit-cover opacity-90" style="height: 380px;">
+            </div>
+
+            <!-- Floating Quote Card (Animated) -->
+            <div class="card position-absolute shadow-lg border-0 d-none d-md-block animate-float" style="bottom: -25px; right: 20px; max-width: 320px; background-color: #0F382A; color: #FFFFFF; border-radius: 14px; border: 1px solid rgba(200, 157, 92, 0.3) !important;">
+              <div class="card-body p-4">
+                <i class="bi bi-book-half text-warning fs-3 mb-2 d-block"></i>
+                <p class="fst-italic small mb-2 text-white-50" style="line-height: 1.5;">
+                  &ldquo;A library is not a luxury, but one of the necessities of life.&rdquo;
+                </p>
+                <div class="small fw-semibold text-warning">&mdash; Henry Ward Beecher</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 2. SEARCH BAR OVERLAY BANNER WITH REAL-TIME SUGGESTIONS   -->
+  <!-- ======================================================== -->
+  <section class="container my-n4 position-relative" style="z-index: 20; margin-top: -32px;">
+    <div class="card border-0 shadow-lg" style="background-color: #0F382A; border-radius: 16px;">
+      <div class="card-body p-3 p-md-4">
+        <form action="/books" method="GET" class="row g-2 align-items-center position-relative">
+          <div class="col-md-10 search-wrapper-relative">
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-0 text-white-50 ps-3">
+                <i class="bi bi-search fs-5"></i>
+              </span>
+              <input type="text" id="heroSearchInput" name="search" autocomplete="off" class="form-control bg-transparent border-0 text-white placeholder-white-50 fs-6 shadow-none" placeholder="Search books by title, author, ISBN, category..." style="color: #FFFFFF;">
+            </div>
+
+            <!-- Real-Time Search Suggestions Popup Box -->
+            <div id="heroSearchSuggestions" class="search-suggestions-box"></div>
+          </div>
+
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-gold w-100 py-2 fw-bold text-uppercase" style="letter-spacing: 0.05em;">
+              Search
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 3. LIVE LIBRARY STATISTICS (Count-Up Animation)           -->
+  <!-- ======================================================== -->
+  <section class="container my-5 pt-4">
+    <div class="row g-4">
+      <div class="col-6 col-lg-3 animate-fade-up delay-1">
+        <div class="card border-0 shadow-sm p-4 h-100 text-center bg-white rounded-4">
+          <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px; background-color: #0F382A; color: #FFFFFF;">
+            <i class="bi bi-book fs-4"></i>
+          </div>
+          <h3 class="fw-bold text-dark mb-1 font-sans stat-count-up" data-target="<%= stats.totalPhysicalCopies %>" data-suffix="+">
+            <%= stats.totalPhysicalCopies %>+
+          </h3>
+          <p class="text-muted small text-uppercase fw-semibold mb-0" style="letter-spacing: 0.05em;">Total Physical Copies</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3 animate-fade-up delay-2">
+        <div class="card border-0 shadow-sm p-4 h-100 text-center bg-white rounded-4">
+          <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px; background-color: #C89D5C; color: #FFFFFF;">
+            <i class="bi bi-people fs-4"></i>
+          </div>
+          <h3 class="fw-bold text-dark mb-1 font-sans stat-count-up" data-target="<%= stats.totalStudents %>" data-suffix="+">
+            <%= stats.totalStudents %>+
+          </h3>
+          <p class="text-muted small text-uppercase fw-semibold mb-0" style="letter-spacing: 0.05em;">Registered Students</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3 animate-fade-up delay-3">
+        <div class="card border-0 shadow-sm p-4 h-100 text-center bg-white rounded-4">
+          <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px; background-color: #164E3D; color: #FFFFFF;">
+            <i class="bi bi-journal-arrow-up fs-4"></i>
+          </div>
+          <h3 class="fw-bold text-dark mb-1 font-sans stat-count-up" data-target="<%= stats.issuedBooksCount %>" data-suffix="+">
+            <%= stats.issuedBooksCount %>+
+          </h3>
+          <p class="text-muted small text-uppercase fw-semibold mb-0" style="letter-spacing: 0.05em;">Currently Issued Books</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3 animate-fade-up delay-4">
+        <div class="card border-0 shadow-sm p-4 h-100 text-center bg-white rounded-4">
+          <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px; background-color: #0B291E; color: #FFFFFF;">
+            <i class="bi bi-check2-circle fs-4"></i>
+          </div>
+          <h3 class="fw-bold text-dark mb-1 font-sans stat-count-up" data-target="<%= stats.availabilityPercent %>" data-suffix="%">
+            <%= stats.availabilityPercent %>%
+          </h3>
+          <p class="text-muted small text-uppercase fw-semibold mb-0" style="letter-spacing: 0.05em;">Catalog Availability</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 4. EXPLORE OUR COLLECTION (Horizontal 1-Line Slider + Arrows) -->
+  <!-- ======================================================== -->
+  <section class="container my-5 py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+      <div>
+        <div class="d-inline-flex align-items-center gap-2 mb-1">
+          <span class="text-warning">&mdash;</span>
+          <span class="text-uppercase fw-bold text-dark" style="letter-spacing: 0.12em; font-size: 0.85rem;">EXPLORE OUR COLLECTION</span>
+          <span class="text-warning">&mdash;</span>
+        </div>
+        <h2 class="fw-bold font-serif mb-0 text-dark">Find your next favorite book from our wide catalog.</h2>
+      </div>
+      <div class="mt-3 mt-md-0">
+        <a href="/books" class="btn btn-outline-primary d-inline-flex align-items-center gap-1">
+          View All Books <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Carousel with Left (<) and Right (>) Navigation Arrows matching Reference Image 1 -->
+    <div class="collection-carousel-wrapper">
+      <!-- Left Arrow Button -->
+      <button type="button" class="carousel-nav-btn" id="carouselPrevBtn" aria-label="Previous Books">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+
+      <!-- Horizontal Scrollable Track -->
+      <div class="collection-track" id="collectionTrack">
+        <% if (featuredBooks && featuredBooks.length > 0) { %>
+          <% featuredBooks.forEach(function(book) { %>
+            <div class="carousel-book-card">
+              <div class="cover-wrap">
+                <a href="/books/<%= book.id %>">
+                  <img src="<%= book.cover_image || '/images/default-cover.svg' %>" alt="<%= book.title %>">
+                </a>
+              </div>
+              <div class="p-3 d-flex flex-column flex-grow-1">
+                <div class="mb-2">
+                  <span class="badge bg-light text-secondary border font-sans" style="font-size: 0.68rem;"><%= book.category.name %></span>
+                </div>
+                <h6 class="fw-bold text-dark mb-1 font-serif text-truncate" title="<%= book.title %>">
+                  <a href="/books/<%= book.id %>" class="text-dark text-decoration-none"><%= book.title %></a>
+                </h6>
+                <p class="text-muted small mb-3 text-truncate" style="font-size: 0.75rem;"><%= book.author.name %></p>
+
+                <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                  <% if (book.available_copies > 0) { %>
+                    <span class="text-success fw-semibold d-flex align-items-center gap-1" style="font-size: 0.72rem;">
+                      <span class="rounded-circle bg-success d-inline-block" style="width: 6px; height: 6px;"></span> Available
+                    </span>
+                  <% } else { %>
+                    <span class="text-danger fw-semibold d-flex align-items-center gap-1" style="font-size: 0.72rem;">
+                      <span class="rounded-circle bg-danger d-inline-block" style="width: 6px; height: 6px;"></span> Issued Out
+                    </span>
+                  <% } %>
+                  <a href="/books/<%= book.id %>" class="text-dark fw-bold text-decoration-none d-inline-flex align-items-center" style="font-size: 0.72rem;">
+                    Details &rarr;
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+
+      <!-- Right Arrow Button -->
+      <button type="button" class="carousel-nav-btn" id="carouselNextBtn" aria-label="Next Books">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 5. HOW IT WORKS & WHY CHOOSE US (Matching Reference Image 1)-->
+  <!-- ======================================================== -->
+  <section class="py-5" style="background-color: #0F382A; color: #FFFFFF;" id="services">
+    <div class="container py-4">
+      <div class="row g-5 align-items-center">
+        <!-- Left: How It Works (4 Steps) -->
+        <div class="col-lg-7">
+          <div class="mb-4">
+            <span class="text-uppercase fw-bold text-warning" style="letter-spacing: 0.12em; font-size: 0.85rem;">HOW IT WORKS</span>
+            <div class="border-bottom border-warning opacity-50 mt-1" style="width: 40px; height: 2px;"></div>
+          </div>
+
+          <div class="row g-4 text-center text-sm-start">
+            <div class="col-sm-6 col-md-3">
+              <div class="rounded-circle border border-warning d-flex align-items-center justify-content-center mx-auto mx-sm-0 mb-3" style="width: 48px; height: 48px; color: #C89D5C;">
+                <i class="bi bi-search fs-5"></i>
+              </div>
+              <div class="small text-warning font-monospace mb-1">01</div>
+              <h6 class="fw-bold mb-1 font-serif">Search</h6>
+              <p class="small text-white-50 mb-0">Search for a book you want to read.</p>
+            </div>
+
+            <div class="col-sm-6 col-md-3">
+              <div class="rounded-circle border border-warning d-flex align-items-center justify-content-center mx-auto mx-sm-0 mb-3" style="width: 48px; height: 48px; color: #C89D5C;">
+                <i class="bi bi-send fs-5"></i>
+              </div>
+              <div class="small text-warning font-monospace mb-1">02</div>
+              <h6 class="fw-bold mb-1 font-serif">Request</h6>
+              <p class="small text-white-50 mb-0">Send a request for the book.</p>
+            </div>
+
+            <div class="col-sm-6 col-md-3">
+              <div class="rounded-circle border border-warning d-flex align-items-center justify-content-center mx-auto mx-sm-0 mb-3" style="width: 48px; height: 48px; color: #C89D5C;">
+                <i class="bi bi-check2-circle fs-5"></i>
+              </div>
+              <div class="small text-warning font-monospace mb-1">03</div>
+              <h6 class="fw-bold mb-1 font-serif">Get Approved</h6>
+              <p class="small text-white-50 mb-0">Admin reviews and approves your request.</p>
+            </div>
+
+            <div class="col-sm-6 col-md-3">
+              <div class="rounded-circle border border-warning d-flex align-items-center justify-content-center mx-auto mx-sm-0 mb-3" style="width: 48px; height: 48px; color: #C89D5C;">
+                <i class="bi bi-journal-check fs-5"></i>
+              </div>
+              <div class="small text-warning font-monospace mb-1">04</div>
+              <h6 class="fw-bold mb-1 font-serif">Read & Return</h6>
+              <p class="small text-white-50 mb-0">Enjoy reading and return on time.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Why Choose Us -->
+        <div class="col-lg-5 ps-lg-5 border-start-lg border-white-10">
+          <div class="mb-4">
+            <span class="text-uppercase fw-bold text-warning" style="letter-spacing: 0.12em; font-size: 0.85rem;">WHY CHOOSE US?</span>
+          </div>
+
+          <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
+            <li class="d-flex align-items-center gap-3">
+              <i class="bi bi-check-circle-fill text-warning fs-5"></i>
+              <span class="text-white-90 small">Huge curated collection of academic & literary books</span>
+            </li>
+            <li class="d-flex align-items-center gap-3">
+              <i class="bi bi-check-circle-fill text-warning fs-5"></i>
+              <span class="text-white-90 small">Easy 1-click online issue requests</span>
+            </li>
+            <li class="d-flex align-items-center gap-3">
+              <i class="bi bi-check-circle-fill text-warning fs-5"></i>
+              <span class="text-white-90 small">Quick book issuing & seamless return processing</span>
+            </li>
+            <li class="d-flex align-items-center gap-3">
+              <i class="bi bi-check-circle-fill text-warning fs-5"></i>
+              <span class="text-white-90 small">Secure and reliable PostgreSQL institutional database</span>
+            </li>
+            <li class="d-flex align-items-center gap-3">
+              <i class="bi bi-check-circle-fill text-warning fs-5"></i>
+              <span class="text-white-90 small">24/7 student self-service catalog access</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer.html') %>

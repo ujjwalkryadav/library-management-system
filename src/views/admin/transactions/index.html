@@ -1,0 +1,126 @@
+<%- include('../../partials/head.html') %>
+
+<div class="admin-wrapper">
+  <%- include('../../partials/sidebar.html') %>
+
+  <div class="admin-content">
+    <%- include('../../partials/navbar.html') %>
+
+    <main class="admin-main-body">
+      <%- include('../../partials/alerts.html') %>
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold mb-1">Audit Transaction Logs</h2>
+          <p class="text-muted mb-0">Historical circulation log of all book issue, renewal, and return actions.</p>
+        </div>
+      </div>
+
+      <!-- Filter Card -->
+      <div class="card filter-card mb-4">
+        <form action="/admin/transactions" method="GET" class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold text-muted">Search Logs</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+              <input type="text" class="form-control" name="search" value="<%= search %>" placeholder="Student name, ID, Book title...">
+            </div>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label small fw-semibold text-muted">Status</label>
+            <select class="form-select" name="status">
+              <option value="">All Statuses</option>
+              <option value="ISSUED" <%= status === 'ISSUED' ? 'selected' : '' %>>Issued</option>
+              <option value="RETURNED" <%= status === 'RETURNED' ? 'selected' : '' %>>Returned</option>
+              <option value="OVERDUE" <%= status === 'OVERDUE' ? 'selected' : '' %>>Overdue</option>
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label small fw-semibold text-muted">Date From</label>
+            <input type="date" class="form-control" name="dateFrom" value="<%= dateFrom %>">
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label small fw-semibold text-muted">Date To</label>
+            <input type="date" class="form-control" name="dateTo" value="<%= dateTo %>">
+          </div>
+
+          <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+            <a href="/admin/transactions" class="btn btn-outline-secondary" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 table-custom">
+              <thead>
+                <tr>
+                  <th>Transaction ID</th>
+                  <th>Student</th>
+                  <th>Book</th>
+                  <th>Issue Date</th>
+                  <th>Due Date</th>
+                  <th>Return Date</th>
+                  <th>Status</th>
+                  <th>Fines</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (transactions && transactions.length > 0) { %>
+                  <% transactions.forEach(function(t) { %>
+                    <tr>
+                      <td class="font-monospace text-muted">#TXN-<%= t.id %></td>
+                      <td>
+                        <div class="fw-bold text-dark"><%= t.student.user.name %></div>
+                        <div class="small text-muted font-monospace"><%= t.student.student_id %></div>
+                      </td>
+                      <td>
+                        <a href="/books/<%= t.book.id %>" class="fw-bold text-dark text-decoration-none"><%= t.book.title %></a>
+                      </td>
+                      <td><%= t.issue_date.toLocaleDateString() %></td>
+                      <td><%= t.due_date.toLocaleDateString() %></td>
+                      <td><%= t.returned_date ? t.returned_date.toLocaleDateString() : '—' %></td>
+                      <td>
+                        <% const badge = helpers.getStatusBadge(t.status); %>
+                        <span class="badge <%= badge.class %>"><%= badge.label %></span>
+                      </td>
+                      <td>
+                        <% if (t.fines && t.fines.length > 0) { %>
+                          <% t.fines.forEach(function(f) { %>
+                            <span class="badge <%= f.status === 'PAID' ? 'bg-success' : (f.status === 'UNPAID' ? 'bg-danger' : 'bg-secondary') %>">
+                              $<%= Number(f.amount).toFixed(2) %> (<%= f.status %>)
+                            </span>
+                          <% }); %>
+                        <% } else { %>
+                          <span class="text-muted small">—</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                      <i class="bi bi-card-checklist fs-1 d-block mb-2 text-secondary"></i>
+                      No transaction logs found.
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <%- include('../../partials/pagination.html') %>
+
+    </main>
+
+    <%- include('../../partials/footer.html') %>
+  </div>
+</div>

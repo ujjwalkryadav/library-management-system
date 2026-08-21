@@ -1,0 +1,204 @@
+<%- include('../../partials/head.html') %>
+
+<div class="admin-wrapper">
+  <%- include('../../partials/sidebar.html') %>
+
+  <div class="admin-content">
+    <%- include('../../partials/navbar.html') %>
+
+    <main class="admin-main-body">
+      <%- include('../../partials/alerts.html') %>
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <a href="/admin/students" class="text-decoration-none text-muted small"><i class="bi bi-arrow-left me-1"></i> Back to Student Directory</a>
+          <h2 class="fw-bold mt-1 mb-0"><%= student.user.name %></h2>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/admin/students/<%= student.id %>/edit" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-pencil me-1"></i> Edit Details
+          </a>
+          <form action="/admin/students/<%= student.id %>/toggle-status" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-sm <%= student.user.is_active ? 'btn-outline-danger' : 'btn-outline-success' %>" onclick="return confirm('Change status of student <%= student.user.name %>?')">
+              <i class="bi <%= student.user.is_active ? 'bi-person-x' : 'bi-person-check' %> me-1"></i>
+              <%= student.user.is_active ? 'Deactivate Account' : 'Activate Account' %>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Student Profile Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+          <div class="row g-4 align-items-center">
+            <div class="col-md-3 text-center border-end">
+              <div class="profile-avatar-circle mx-auto mb-3">
+                <%= student.user.name.charAt(0).toUpperCase() %>
+              </div>
+              <h5 class="fw-bold mb-1"><%= student.user.name %></h5>
+              <div class="badge bg-primary-subtle text-primary font-monospace fs-6 mb-2"><%= student.student_id %></div>
+              <div>
+                <% if (student.user.is_active) { %>
+                  <span class="badge bg-success">Active Patron</span>
+                <% } else { %>
+                  <span class="badge bg-danger">Deactivated</span>
+                <% } %>
+              </div>
+            </div>
+
+            <div class="col-md-9">
+              <div class="row g-3">
+                <div class="col-sm-6">
+                  <span class="text-muted small d-block">Academic Email</span>
+                  <strong class="text-dark"><%= student.user.email %></strong>
+                </div>
+                <div class="col-sm-6">
+                  <span class="text-muted small d-block">Phone Number</span>
+                  <strong class="text-dark"><%= student.user.phone || 'Not provided' %></strong>
+                </div>
+                <div class="col-sm-6">
+                  <span class="text-muted small d-block">Enrollment / Roll Number</span>
+                  <strong class="text-dark"><%= student.enrollment_number || 'N/A' %></strong>
+                </div>
+                <div class="col-sm-6">
+                  <span class="text-muted small d-block">Department</span>
+                  <strong class="text-dark"><%= student.department %></strong>
+                </div>
+                <div class="col-sm-6">
+                  <span class="text-muted small d-block">Course & Program</span>
+                  <strong class="text-dark"><%= student.course %></strong>
+                </div>
+                <div class="col-sm-6">
+                  <span class="text-muted small d-block">Semester & Year</span>
+                  <strong class="text-dark"><%= student.semester || '—' %> &bull; <%= student.year || '—' %></strong>
+                </div>
+                <div class="col-sm-6">
+                  <span class="text-muted small d-block">Address</span>
+                  <span class="text-dark"><%= student.address || 'Campus Hostel / Off-Campus' %></span>
+                </div>
+                <div class="col-sm-6">
+                  <span class="text-muted small d-block">Membership Joined</span>
+                  <span class="text-dark"><%= student.joined_at.toLocaleDateString() %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Issues Section -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-book text-primary me-2"></i> Current Issued Books (<%= student.issues.filter(i => ['ISSUED', 'OVERDUE'].includes(i.status)).length %>)</h6>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Book Title</th>
+                  <th>Issue Date</th>
+                  <th>Due Date</th>
+                  <th>Renewals</th>
+                  <th>Status</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% const activeIssues = student.issues.filter(i => ['ISSUED', 'OVERDUE'].includes(i.status)); %>
+                <% if (activeIssues.length > 0) { %>
+                  <% activeIssues.forEach(function(l) { %>
+                    <tr>
+                      <td class="fw-bold"><a href="/books/<%= l.book.id %>" class="text-dark text-decoration-none"><%= l.book.title %></a></td>
+                      <td><%= l.issue_date.toLocaleDateString('en-IN') %></td>
+                      <td><%= l.due_date.toLocaleDateString('en-IN') %></td>
+                      <td><%= l.renewal_count %></td>
+                      <td>
+                        <% const badge = helpers.getStatusBadge(l.status); %>
+                        <span class="badge <%= badge.class %>"><%= badge.label %></span>
+                      </td>
+                      <td class="text-end">
+                        <form action="/issues/admin/<%= l.id %>/return" method="POST" class="d-inline">
+                          <button type="submit" class="btn btn-outline-success btn-sm" onclick="return confirm('Process return for <%= l.book.title %>?')">
+                            <i class="bi bi-box-arrow-in-left me-1"></i> Accept Return
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">No active issued books for this student.</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fines Section -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-cash-stack text-danger me-2"></i> Student Fine Ledger</h6>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Book / Reason</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Assessed Date</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (student.fines && student.fines.length > 0) { %>
+                  <% student.fines.forEach(function(f) { %>
+                    <tr>
+                      <td>
+                        <div class="fw-medium"><%= f.issue.book.title %></div>
+                        <div class="small text-muted"><%= f.reason %></div>
+                      </td>
+                      <td class="fw-bold">$<%= Number(f.amount).toFixed(2) %></td>
+                      <td>
+                        <% const badge = helpers.getStatusBadge(f.status); %>
+                        <span class="badge <%= badge.class %>"><%= badge.label %></span>
+                      </td>
+                      <td class="small text-muted"><%= f.created_at.toLocaleDateString() %></td>
+                      <td class="text-end">
+                        <% if (f.status === 'UNPAID') { %>
+                          <form action="/fines/admin/<%= f.id %>/pay" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-sm py-1 px-2" title="Mark as Paid">
+                              <i class="bi bi-check-lg"></i> Mark Paid
+                            </button>
+                          </form>
+                          <form action="/fines/admin/<%= f.id %>/waive" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm py-1 px-2" onclick="return confirm('Waive this fine?')" title="Waive Fine">
+                              <i class="bi bi-slash-circle"></i> Waive
+                            </button>
+                          </form>
+                        <% } else { %>
+                          <span class="text-muted small">Settled (<%= f.status %>)</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">No fines on record.</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <%- include('../../partials/footer.html') %>
+  </div>
+</div>

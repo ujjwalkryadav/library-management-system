@@ -1,0 +1,69 @@
+<%- include('../partials/head.html') %>
+
+<div class="admin-wrapper">
+  <%- include('../partials/sidebar.html') %>
+
+  <div class="admin-content">
+    <%- include('../partials/navbar.html') %>
+
+    <main class="admin-main-body">
+      <%- include('../partials/alerts.html') %>
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="fw-bold mb-1">System Notifications</h2>
+          <p class="text-muted mb-0">Alerts, student requests, and critical events.</p>
+        </div>
+        <form action="/notifications/mark-all-read" method="POST">
+          <button type="submit" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-check2-all me-1"></i> Mark All as Read
+          </button>
+        </form>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            <% if (notifications && notifications.length > 0) { %>
+              <% notifications.forEach(function(n) { %>
+                <div class="list-group-item p-3 d-flex justify-content-between align-items-start <%= !n.is_read ? 'bg-light border-start border-primary border-4' : '' %>" id="notif-item-<%= n.id %>">
+                  <div class="d-flex gap-3">
+                    <div class="mt-1">
+                      <% if (n.type === 'BOOK_REQUEST') { %>
+                        <i class="bi bi-inbox-fill text-warning fs-4"></i>
+                      <% } else if (n.type === 'BOOK_OVERDUE') { %>
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-4"></i>
+                      <% } else if (n.type === 'FINE') { %>
+                        <i class="bi bi-cash-stack text-danger fs-4"></i>
+                      <% } else { %>
+                        <i class="bi bi-bell-fill text-primary fs-4"></i>
+                      <% } %>
+                    </div>
+                    <div>
+                      <h6 class="fw-bold mb-1 text-dark"><%= n.title %></h6>
+                      <p class="text-secondary small mb-1"><%= n.message %></p>
+                      <span class="text-muted" style="font-size: 0.75rem;"><%= n.created_at.toLocaleString() %></span>
+                    </div>
+                  </div>
+                  <% if (!n.is_read) { %>
+                    <button class="btn btn-sm btn-outline-secondary mark-read-btn" data-notif-id="<%= n.id %>">
+                      Mark read
+                    </button>
+                  <% } %>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <div class="text-center py-5 text-muted">
+                <i class="bi bi-bell-slash fs-1 d-block mb-2 text-secondary"></i>
+                You have no notifications.
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <%- include('../partials/footer.html') %>
+  </div>
+</div>

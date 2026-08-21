@@ -1,0 +1,148 @@
+<%- include('../../partials/head.html') %>
+
+<div class="admin-wrapper">
+  <%- include('../../partials/sidebar.html') %>
+
+  <div class="admin-content">
+    <%- include('../../partials/navbar.html') %>
+
+    <main class="admin-main-body">
+      <%- include('../../partials/alerts.html') %>
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold mb-1">Book Issue Requests</h2>
+          <p class="text-muted mb-0">Review student book requests, approve issues, and manage holding queue.</p>
+        </div>
+      </div>
+
+      <!-- Filter Tabs & Search -->
+      <div class="card filter-card mb-4">
+        <form action="/requests/admin" method="GET" class="row g-3 align-items-end">
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-muted">Search Requests</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+              <input type="text" class="form-control" name="search" value="<%= search %>" placeholder="Student name, ID, or Book title...">
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold text-muted">Filter by Status</label>
+            <select class="form-select" name="status">
+              <option value="PENDING" <%= selectedStatus === 'PENDING' ? 'selected' : '' %>>Pending Review</option>
+              <option value="APPROVED" <%= selectedStatus === 'APPROVED' ? 'selected' : '' %>>Approved</option>
+              <option value="REJECTED" <%= selectedStatus === 'REJECTED' ? 'selected' : '' %>>Rejected</option>
+              <option value="" <%= !selectedStatus ? 'selected' : '' %>>All Statuses</option>
+            </select>
+          </div>
+
+          <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">Apply</button>
+            <a href="/requests/admin" class="btn btn-outline-secondary" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Requests Table -->
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 table-custom">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Book Requested</th>
+                  <th>Request Date</th>
+                  <th>Available Stock</th>
+                  <th>Status</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (requests && requests.length > 0) { %>
+                  <% requests.forEach(function(r) { %>
+                    <tr>
+                      <td>
+                        <div class="fw-bold text-dark"><%= r.student.user.name %></div>
+                        <div class="small text-muted font-monospace"><%= r.student.student_id %> &bull; <%= r.student.department %></div>
+                      </td>
+                      <td>
+                        <a href="/books/<%= r.book.id %>" class="fw-bold text-dark text-decoration-none"><%= r.book.title %></a>
+                        <div class="small text-muted">By <%= r.book.author.name %></div>
+                      </td>
+                      <td><%= r.request_date.toLocaleDateString() %></td>
+                      <td>
+                        <span class="badge <%= r.book.available_copies > 0 ? 'bg-success' : 'bg-danger' %>">
+                          <%= r.book.available_copies %> in stock
+                        </span>
+                      </td>
+                      <td>
+                        <% const badge = helpers.getStatusBadge(r.status); %>
+                        <span class="badge <%= badge.class %>"><%= badge.label %></span>
+                        <% if (r.status === 'REJECTED' && r.rejection_reason) { %>
+                          <div class="small text-danger mt-1">Reason: <%= r.rejection_reason %></div>
+                        <% } %>
+                      </td>
+                      <td class="text-end">
+                        <% if (r.status === 'PENDING') { %>
+                          <form action="/requests/admin/<%= r.id %>/approve" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-sm me-1" <%= r.book.available_copies <= 0 ? 'disabled' : '' %> title="Approve and Issue Book">
+                              <i class="bi bi-check-lg me-1"></i> Approve
+                            </button>
+                          </form>
+                          <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal<%= r.id %>" title="Decline Request">
+                            <i class="bi bi-x-lg"></i>
+                          </button>
+
+                          <!-- Reject Modal -->
+                          <div class="modal fade" id="rejectModal<%= r.id %>" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                              <div class="modal-content text-start">
+                                <form action="/requests/admin/<%= r.id %>/reject" method="POST">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title">Decline Book Request</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <p>Reject request for <strong><%= r.book.title %></strong> from <strong><%= r.student.user.name %></strong>?</p>
+                                    <div class="mb-3">
+                                      <label for="reasonInput<%= r.id %>" class="form-label fw-semibold">Rejection Reason</label>
+                                      <textarea class="form-control" id="reasonInput<%= r.id %>" name="reason" rows="2" placeholder="e.g. Reserved for internal curriculum reference" required></textarea>
+                                    </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-danger">Confirm Rejection</button>
+                                  </div>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        <% } else { %>
+                          <span class="text-muted small">Reviewed</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                      <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                      No requests found matching your filter criteria.
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <%- include('../../partials/pagination.html') %>
+
+    </main>
+
+    <%- include('../../partials/footer.html') %>
+  </div>
+</div>

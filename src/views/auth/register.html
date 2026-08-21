@@ -1,0 +1,118 @@
+<%- include('../partials/head.html') %>
+<%- include('../partials/navbar.html') %>
+
+<div class="container my-5 flex-grow-1">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <%- include('../partials/alerts.html') %>
+
+      <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-primary text-white p-4 border-0">
+          <div class="d-flex align-items-center gap-3">
+            <div class="bg-white bg-opacity-25 rounded-circle p-2 d-flex align-items-center justify-content-center">
+              <i class="bi bi-person-plus-fill fs-3 text-white"></i>
+            </div>
+            <div>
+              <h3 class="fw-bold mb-0 text-white">Student Registration</h3>
+              <p class="small text-white-50 mb-0">Create your digital student library membership</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          <form action="/register" method="POST" id="studentRegisterForm">
+            <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">
+              <i class="bi bi-person-lines-fill me-2"></i> Account & Personal Info
+            </h5>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label for="name" class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="name" name="name" value="<%= typeof formData !== 'undefined' && formData.name ? formData.name : '' %>" placeholder="e.g. Alex Sharma" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="email" class="form-label fw-semibold">Academic Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="email" name="email" value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>" placeholder="student@college.edu" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="password" class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="At least 6 characters" minlength="6" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="confirmPassword" class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Repeat your password" minlength="6" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="phone" class="form-label fw-semibold">Phone Number</label>
+                <input type="tel" class="form-control" id="phone" name="phone" value="<%= typeof formData !== 'undefined' && formData.phone ? formData.phone : '' %>" placeholder="+91 98765 43210">
+              </div>
+
+              <div class="col-md-6">
+                <label for="dateOfBirth" class="form-label fw-semibold">Date of Birth</label>
+                <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" value="<%= typeof formData !== 'undefined' && formData.dateOfBirth ? formData.dateOfBirth : '' %>">
+              </div>
+            </div>
+
+            <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">
+              <i class="bi bi-mortarboard-fill me-2"></i> Academic & Institutional Details
+            </h5>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label for="studentId" class="form-label fw-semibold">Student ID / Roll No. <span class="text-danger">*</span></label>
+                <input type="text" class="form-control text-uppercase" id="studentId" name="studentId" value="<%= typeof formData !== 'undefined' && formData.studentId ? formData.studentId : '' %>" placeholder="e.g. STU2026045" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="enrollmentNumber" class="form-label fw-semibold">Enrollment / Registration No.</label>
+                <input type="text" class="form-control" id="enrollmentNumber" name="enrollmentNumber" value="<%= typeof formData !== 'undefined' && formData.enrollmentNumber ? formData.enrollmentNumber : '' %>" placeholder="e.g. EN2024CS99">
+              </div>
+
+              <div class="col-md-6">
+                <label for="department" class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="department" name="department" value="<%= typeof formData !== 'undefined' && formData.department ? formData.department : '' %>" placeholder="e.g. Computer Science & Engineering" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="course" class="form-label fw-semibold">Course / Degree Program <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="course" name="course" value="<%= typeof formData !== 'undefined' && formData.course ? formData.course : '' %>" placeholder="e.g. B.Tech, MBA, M.Sc" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="semester" class="form-label fw-semibold">Current Semester</label>
+                <input type="text" class="form-control" id="semester" name="semester" value="<%= typeof formData !== 'undefined' && formData.semester ? formData.semester : '' %>" placeholder="e.g. 4th Semester">
+              </div>
+
+              <div class="col-md-6">
+                <label for="year" class="form-label fw-semibold">Academic Year</label>
+                <input type="text" class="form-control" id="year" name="year" value="<%= typeof formData !== 'undefined' && formData.year ? formData.year : '' %>" placeholder="e.g. 2nd Year">
+              </div>
+
+              <div class="col-12">
+                <label for="address" class="form-label fw-semibold">Campus Hostel / Residential Address</label>
+                <textarea class="form-control" id="address" name="address" rows="2" placeholder="Enter residential address"><%= typeof formData !== 'undefined' && formData.address ? formData.address : '' %></textarea>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary py-2 fw-semibold fs-6">
+                <i class="bi bi-check-circle me-2"></i> Register Student Account
+              </button>
+            </div>
+          </form>
+
+          <div class="text-center mt-4 pt-2 border-top">
+            <span class="text-muted small">Already have an account?</span>
+            <a href="/login" class="small fw-semibold text-primary ms-1">Sign In here</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer.html') %>

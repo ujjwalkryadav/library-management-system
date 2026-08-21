@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" fill="none">
+  <!-- Outer Gold Laurel / Leaves -->
+  <path d="M50 12 C52 16 52 20 50 24 C48 20 48 16 50 12 Z" fill="#C89D5C"/>
+  <path d="M42 16 C45 19 46 23 44 26 C41 24 40 20 42 16 Z" fill="#C89D5C"/>
+  <path d="M58 16 C55 19 54 23 56 26 C59 24 60 20 58 16 Z" fill="#C89D5C"/>
+  
+  <!-- Open Book Spine & Pages in Gold -->
+  <path d="M50 30 L50 82" stroke="#C89D5C" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Left Pages -->
+  <path d="M50 34 C38 28 22 30 14 34 L14 74 C22 70 38 68 50 74 Z" stroke="#0F382A" stroke-width="3.5" fill="#FFFFFF"/>
+  <path d="M50 42 C40 37 26 38 18 42" stroke="#C89D5C" stroke-width="2" stroke-linecap="round"/>
+  <path d="M50 50 C40 45 26 46 18 50" stroke="#C89D5C" stroke-width="2" stroke-linecap="round"/>
+  <path d="M50 58 C40 53 26 54 18 58" stroke="#C89D5C" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Right Pages -->
+  <path d="M50 34 C62 28 78 30 86 34 L86 74 C78 70 62 68 50 74 Z" stroke="#0F382A" stroke-width="3.5" fill="#FFFFFF"/>
+  <path d="M50 42 C60 37 74 38 82 42" stroke="#C89D5C" stroke-width="2" stroke-linecap="round"/>
+  <path d="M50 50 C60 45 74 46 82 50" stroke="#C89D5C" stroke-width="2" stroke-linecap="round"/>
+  <path d="M50 58 C60 53 74 54 82 58" stroke="#C89D5C" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Bottom Ribbon / Foundation -->
+  <path d="M12 78 C28 74 42 75 50 80 C58 75 72 74 88 78" stroke="#C89D5C" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

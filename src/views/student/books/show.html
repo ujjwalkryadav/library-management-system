@@ -1,0 +1,129 @@
+<%- include('../../partials/head.html') %>
+<%- include('../../partials/navbar.html') %>
+
+<main class="container my-4 flex-grow-1">
+  <%- include('../../partials/alerts.html') %>
+
+  <div class="mb-4">
+    <a href="/books" class="text-decoration-none text-muted small"><i class="bi bi-arrow-left me-1"></i> Back to Catalog</a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <!-- Main Book Overview Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body p-4 p-md-5">
+          <div class="row g-4">
+            <div class="col-md-4 text-center">
+              <img src="<%= book.cover_image || '/images/default-cover.svg' %>" alt="<%= book.title %>" class="img-fluid rounded-3 shadow border mb-3" style="max-height: 300px;">
+              <div>
+                <% if (book.available_copies > 0) { %>
+                  <span class="badge bg-success fs-6 py-2 px-3"><i class="bi bi-check-circle me-1"></i> <%= book.available_copies %> Copies in Stock</span>
+                <% } else { %>
+                  <span class="badge bg-danger fs-6 py-2 px-3"><i class="bi bi-x-circle me-1"></i> All Copies Issued Out</span>
+                <% } %>
+              </div>
+            </div>
+
+            <div class="col-md-8">
+              <div class="mb-2">
+                <span class="badge bg-primary-subtle text-primary me-2"><%= book.category.name %></span>
+                <span class="badge bg-secondary-subtle text-secondary font-monospace"><%= book.shelf_location ? 'Shelf: ' + book.shelf_location : 'General Stacks' %></span>
+              </div>
+
+              <h2 class="fw-bold text-dark mb-1"><%= book.title %></h2>
+              <p class="text-muted fs-6 mb-3">Authored by <strong class="text-dark"><%= book.author.name %></strong></p>
+
+              <div class="row g-2 mb-4 small text-muted">
+                <div class="col-sm-6"><strong>ISBN:</strong> <span class="font-monospace text-dark"><%= book.isbn || 'N/A' %></span></div>
+                <div class="col-sm-6"><strong>Publisher:</strong> <span class="text-dark"><%= book.publisher || 'Academic Press' %></span></div>
+                <div class="col-sm-6"><strong>Year of Publication:</strong> <span class="text-dark"><%= book.publication_year || 'N/A' %></span></div>
+                <div class="col-sm-6"><strong>Language:</strong> <span class="text-dark"><%= book.language %></span></div>
+                <div class="col-sm-6"><strong>Total Library Copies:</strong> <span class="text-dark"><%= book.total_copies %></span></div>
+                <div class="col-sm-6"><strong>Available for Issue:</strong> <span class="text-dark"><%= book.available_copies %></span></div>
+              </div>
+
+              <h6 class="fw-bold text-dark border-top pt-3 mb-2">Book Abstract & Overview</h6>
+              <p class="text-secondary leading-relaxed mb-0"><%= book.description || 'No detailed overview provided for this book.' %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Author Profile Card -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-person-lines-fill text-primary me-2"></i> About the Author: <%= book.author.name %></h6>
+        </div>
+        <div class="card-body">
+          <p class="text-secondary small mb-0"><%= book.author.biography || 'No author biography available.' %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Request / Circulation Action Box -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm sticky-top" style="top: 80px;">
+        <div class="card-header bg-white">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-journal-bookmark-fill text-primary me-2"></i> Borrowing Status</h6>
+        </div>
+        <div class="card-body p-4">
+          <% if (currentUser && currentUser.role === 'STUDENT') { %>
+            <% if (studentHasActiveIssue) { %>
+              <div class="alert alert-info py-3 mb-0">
+                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                <strong>Currently Issued to You</strong>
+                <p class="small mb-0 mt-1">You already have this book issued. You can review your due date and renew in your dashboard.</p>
+                <a href="/issues/student/my-books" class="btn btn-sm btn-outline-primary mt-3">View My Books</a>
+              </div>
+            <% } else if (studentHasPendingRequest) { %>
+              <div class="alert alert-warning py-3 mb-0">
+                <i class="bi bi-hourglass-split me-2 fs-5"></i>
+                <strong>Request Under Review</strong>
+                <p class="small mb-0 mt-1">Your request for this book has been submitted and is awaiting librarian approval.</p>
+                <a href="/requests/student" class="btn btn-sm btn-outline-warning text-dark mt-3">View My Requests</a>
+              </div>
+            <% } else if (book.available_copies > 0) { %>
+              <p class="text-muted small mb-3">
+                Standard borrowing duration is <strong><%= systemSettings ? systemSettings.loan_period_days : 14 %> days</strong>. You can renew before the due date if no hold is placed.
+              </p>
+              <form action="/requests/books/<%= book.id %>/request" method="POST">
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                  <i class="bi bi-send me-1"></i> Request to Issue this Book
+                </button>
+              </form>
+            <% } else { %>
+              <div class="alert alert-danger py-3 mb-0">
+                <i class="bi bi-x-circle me-2 fs-5"></i>
+                <strong>Currently Unavailable</strong>
+                <p class="small mb-0 mt-1">All copies of this title are currently issued to other students. Please check back later.</p>
+              </div>
+            <% } %>
+          <% } else if (currentUser && currentUser.role === 'ADMIN') { %>
+            <div class="alert alert-light border py-3">
+              <strong>Admin Mode</strong>
+              <p class="small text-muted mb-3">You are browsing in Administrator mode.</p>
+              <a href="/books/admin/<%= book.id %>/edit" class="btn btn-outline-primary btn-sm w-100 mb-2">Edit Book Info</a>
+              <% if (book.available_copies > 0) { %>
+                <a href="/issues/admin/create?bookId=<%= book.id %>" class="btn btn-primary btn-sm w-100">Direct Issue Book</a>
+              <% } %>
+            </div>
+          <% } else { %>
+            <div class="text-center py-3">
+              <i class="bi bi-lock fs-1 text-muted d-block mb-2"></i>
+              <h6 class="fw-bold">Sign In Required</h6>
+              <p class="small text-muted mb-3">Please sign in with your student credentials to reserve or issue this book.</p>
+              <a href="/login" class="btn btn-primary w-100 mb-2">Sign In to Request</a>
+              <% if (systemSettings && systemSettings.allow_student_registration) { %>
+                <a href="/register" class="btn btn-outline-secondary btn-sm w-100">Create Student Account</a>
+              <% } %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<%- include('../../partials/footer.html') %>

@@ -1,0 +1,273 @@
+<%- include('../partials/head.html') %>
+
+<div class="admin-layout">
+  <%- include('../partials/sidebar.html') %>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-light d-lg-none border" type="button" id="sidebarToggleBtn">
+          <i class="bi bi-list"></i>
+        </button>
+        <span class="badge badge-gold text-dark px-3 py-2 fw-semibold">
+          <i class="bi bi-person-badge me-1"></i> Staff Console &bull; <%= employee.department %>
+        </span>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="d-none d-sm-flex align-items-center gap-2 px-3 py-1 bg-light border rounded-pill small text-muted">
+          <i class="bi bi-calendar3 text-primary"></i>
+          <span><%= new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', weekday: 'short' }) %></span>
+        </div>
+
+        <%- include('../partials/notifications-dropdown.html') %>
+      </div>
+    </header>
+
+    <main class="p-3 p-md-4 p-xl-5 flex-grow-1">
+      <%- include('../partials/alerts.html') %>
+
+      <!-- Staff Welcome Header -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold font-serif mb-1 text-dark">
+            Staff Operations Portal: <%= currentUser.name %>
+          </h2>
+          <p class="text-muted small mb-0">
+            <%= employee.designation %> &bull; Employee ID: <span class="font-monospace fw-bold text-dark"><%= employee.employee_id %></span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Permission-Based KPI Row (Clickable) -->
+      <div class="row g-3 mb-4">
+        <% if (permissions.includes('books.view')) { %>
+          <div class="col-sm-6 col-xl-3">
+            <a href="/books" class="text-decoration-none d-block h-100">
+              <div class="kpi-card kpi-card-clickable">
+                <div class="kpi-icon kpi-icon-green">
+                  <i class="bi bi-book"></i>
+                </div>
+                <div>
+                  <div class="kpi-title">Catalog Inventory</div>
+                  <div class="kpi-value"><%= stats.totalBooks %></div>
+                  <div class="kpi-subtext text-success">
+                    <i class="bi bi-check-circle me-1"></i> <%= stats.availableCopies %> copies in stock
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        <% } %>
+
+        <% if (permissions.includes('requests.view')) { %>
+          <div class="col-sm-6 col-xl-3">
+            <a href="/requests/admin" class="text-decoration-none d-block h-100">
+              <div class="kpi-card kpi-card-clickable">
+                <div class="kpi-icon kpi-icon-amber">
+                  <i class="bi bi-envelope-paper"></i>
+                </div>
+                <div>
+                  <div class="kpi-title">Pending Requests</div>
+                  <div class="kpi-value"><%= stats.pendingRequests %></div>
+                  <div class="kpi-subtext text-muted">
+                    <i class="bi bi-arrow-up-right me-1"></i> Awaiting review
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        <% } %>
+
+        <% if (permissions.includes('issues.view')) { %>
+          <div class="col-sm-6 col-xl-3">
+            <a href="/issues/admin" class="text-decoration-none d-block h-100">
+              <div class="kpi-card kpi-card-clickable">
+                <div class="kpi-icon kpi-icon-purple">
+                  <i class="bi bi-journal-arrow-up"></i>
+                </div>
+                <div>
+                  <div class="kpi-title">Issued Books</div>
+                  <div class="kpi-value"><%= stats.activeIssues %></div>
+                  <div class="kpi-subtext <%= stats.overdueIssues > 0 ? 'text-danger' : 'text-muted' %>">
+                    <i class="bi bi-clock-history me-1"></i> <%= stats.overdueIssues %> overdue return(s)
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        <% } %>
+
+        <% if (permissions.includes('fines.view')) { %>
+          <div class="col-sm-6 col-xl-3">
+            <a href="/fines/admin?status=UNPAID" class="text-decoration-none d-block h-100">
+              <div class="kpi-card kpi-card-clickable">
+                <div class="kpi-icon kpi-icon-red">
+                  <i class="bi bi-currency-rupee"></i>
+                </div>
+                <div>
+                  <div class="kpi-title">Unpaid Fines</div>
+                  <div class="kpi-value text-danger"><%= helpers.formatCurrency(stats.unpaidFines) %></div>
+                  <div class="kpi-subtext text-muted">Desk penalties</div>
+                </div>
+              </div>
+            </a>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Quick Staff Operations Grid & Recent Logs -->
+      <div class="row g-4">
+        <!-- Authorized Operational Capabilities -->
+        <div class="col-lg-7">
+          <div class="dash-card mb-4">
+            <div class="dash-card-header">
+              <h5 class="dash-card-title"><i class="bi bi-shield-check text-primary me-2"></i> Authorized Operational Capabilities</h5>
+              <span class="badge bg-light text-secondary border font-sans"><%= permissions.length %> Granted Permissions</span>
+            </div>
+            <div class="card-body p-4">
+              <p class="text-muted small mb-3">
+                Your staff profile has been provisioned with the following operational modules by the Chief Librarian.
+              </p>
+
+              <div class="row g-3">
+                <% if (permissions.includes('books.create')) { %>
+                  <div class="col-sm-6">
+                    <a href="/books/admin/create" class="p-3 bg-light rounded-3 d-flex align-items-center gap-3 text-dark text-decoration-none border hover-shadow h-100">
+                      <div class="kpi-icon kpi-icon-green" style="width: 42px; height: 42px; font-size: 1.1rem;">
+                        <i class="bi bi-plus-circle"></i>
+                      </div>
+                      <div>
+                        <div class="fw-bold small">Add New Book</div>
+                        <div class="text-muted" style="font-size: 0.72rem;">Catalog new inventory</div>
+                      </div>
+                    </a>
+                  </div>
+                <% } %>
+
+                <% if (permissions.includes('issues.create')) { %>
+                  <div class="col-sm-6">
+                    <a href="/issues/admin/create" class="p-3 bg-light rounded-3 d-flex align-items-center gap-3 text-dark text-decoration-none border hover-shadow h-100">
+                      <div class="kpi-icon kpi-icon-purple" style="width: 42px; height: 42px; font-size: 1.1rem;">
+                        <i class="bi bi-journal-plus"></i>
+                      </div>
+                      <div>
+                        <div class="fw-bold small">Issue Book</div>
+                        <div class="text-muted" style="font-size: 0.72rem;">Issue book to student</div>
+                      </div>
+                    </a>
+                  </div>
+                <% } %>
+
+                <% if (permissions.includes('requests.view')) { %>
+                  <div class="col-sm-6">
+                    <a href="/requests/admin" class="p-3 bg-light rounded-3 d-flex align-items-center gap-3 text-dark text-decoration-none border hover-shadow h-100">
+                      <div class="kpi-icon kpi-icon-amber" style="width: 42px; height: 42px; font-size: 1.1rem;">
+                        <i class="bi bi-envelope-paper"></i>
+                      </div>
+                      <div>
+                        <div class="fw-bold small">Review Requests</div>
+                        <div class="text-muted" style="font-size: 0.72rem;">Approve student reservations</div>
+                      </div>
+                    </a>
+                  </div>
+                <% } %>
+
+                <% if (permissions.includes('issues.return')) { %>
+                  <div class="col-sm-6">
+                    <a href="/issues/admin" class="p-3 bg-light rounded-3 d-flex align-items-center gap-3 text-dark text-decoration-none border hover-shadow h-100">
+                      <div class="kpi-icon kpi-icon-blue" style="width: 42px; height: 42px; font-size: 1.1rem;">
+                        <i class="bi bi-arrow-return-left"></i>
+                      </div>
+                      <div>
+                        <div class="fw-bold small">Process Returns</div>
+                        <div class="text-muted" style="font-size: 0.72rem;">Accept books & record returns</div>
+                      </div>
+                    </a>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Requests Queue for Staff -->
+          <% if (permissions.includes('requests.view')) { %>
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <h5 class="dash-card-title">Pending Book Requests</h5>
+                <a href="/requests/admin" class="small text-primary fw-bold text-decoration-none">Manage Queue &rarr;</a>
+              </div>
+              <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Book</th>
+                      <th>Request Date</th>
+                      <th class="text-end">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (pendingRequestsList && pendingRequestsList.length > 0) { %>
+                      <% pendingRequestsList.forEach(function(r) { %>
+                        <tr>
+                          <td>
+                            <div class="fw-semibold small text-dark"><%= r.student.user.name %></div>
+                            <div class="text-muted font-monospace" style="font-size: 0.7rem;"><%= r.student.student_id %></div>
+                          </td>
+                          <td>
+                            <div class="small fw-medium text-truncate" style="max-width: 150px;"><%= r.book.title %></div>
+                          </td>
+                          <td class="small text-muted"><%= r.request_date.toLocaleDateString() %></td>
+                          <td class="text-end">
+                            <a href="/requests/admin" class="btn btn-sm btn-outline-primary py-1 px-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" style="font-size: 0.75rem;" title="Review student eligibility and approve issue">
+                              <i class="bi bi-shield-check"></i>
+                              <span>Review & Approve</span>
+                            </a>
+                          </td>
+                        </tr>
+                      <% }); %>
+                    <% } else { %>
+                      <tr>
+                        <td colspan="4" class="text-center py-4 text-muted small">No pending requests at this time.</td>
+                      </tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Right Column: My Audit Log -->
+        <div class="col-lg-5">
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h5 class="dash-card-title"><i class="bi bi-clock-history text-primary me-2"></i> My Recent Operations</h5>
+            </div>
+            <div class="p-0">
+              <% if (myRecentActivities && myRecentActivities.length > 0) { %>
+                <% myRecentActivities.forEach(function(act) { %>
+                  <div class="activity-item">
+                    <div class="activity-avatar activity-avatar-green">
+                      <i class="bi bi-check2"></i>
+                    </div>
+                    <div>
+                      <div class="small fw-semibold text-dark"><%= act.action.replace(/_/g, ' ') %></div>
+                      <div class="text-muted" style="font-size: 0.72rem;"><%= act.details || act.entity %></div>
+                      <span class="text-muted" style="font-size: 0.68rem;"><%= new Date(act.created_at).toLocaleString() %></span>
+                    </div>
+                  </div>
+                <% }); %>
+              <% } else { %>
+                <div class="text-center py-5 text-muted small">No recent activity recorded yet.</div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer.html') %>
