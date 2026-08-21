@@ -1,11 +1,13 @@
 <div align="center">
 
+  <h1>📚 Central Library Management System</h1>
+
   <!-- Animated Live Status Typing Header -->
   <a href="https://library-management-system-kxep.onrender.com" target="_blank">
-    <img src="https://readme-typing-svg.demolab.com?font=Playfair+Display&weight=700&size=26&duration=2500&pause=800&color=166534&center=true&vCenter=true&width=620&height=50&lines=✨+Project+is+Live+Now!;📚+Central+Library+Management+System;💳+Online+UPI+QR+Payment+%26+Live+Timer;🛡️+Multi-Role+Admin%2C+Staff+%26+Student+Portals" alt="Project is Live Now Typing Header" />
+    <img src="https://readme-typing-svg.demolab.com?font=Poppins&weight=600&size=22&duration=2500&pause=1000&color=059669&center=true&vCenter=true&width=620&lines=Project+is+Live+Now+!;Full-Stack+Library+Management+System;Online+UPI+QR+Payments+and+Live+Timer;Role-Based+Admin,+Staff+and+Student+Portals" alt="Project is Live Now" />
   </a>
 
-  <br>
+  <br><br>
 
   <!-- Big Glowing Live Demo Button -->
   <p align="center">
