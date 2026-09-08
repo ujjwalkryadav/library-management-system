@@ -43,6 +43,11 @@ const PERMISSIONS = {
   'fines.mark_paid': { name: 'Mark Fine Paid', category: 'Finance', desc: 'Record fine payment receipt' },
   'fines.waive': { name: 'Waive Fine', category: 'Finance', desc: 'Waive student penalty dues' },
 
+  // Attendance
+  'attendance.view': { name: 'View Attendance Logs', category: 'Attendance', desc: 'View student daily library attendance ledger' },
+  'attendance.scan': { name: 'Scan & Mark Attendance', category: 'Attendance', desc: 'Scan student QR codes / barcodes to mark attendance' },
+  'attendance.manage': { name: 'Edit & Manage Attendance', category: 'Attendance', desc: 'Manually create, edit, or adjust student attendance records' },
+
   // Reports & Logs
   'reports.view': { name: 'View Reports & Audits', category: 'Reports', desc: 'View circulation statistics and transaction logs' },
 

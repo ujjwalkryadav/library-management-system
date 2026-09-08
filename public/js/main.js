@@ -11,6 +11,71 @@ document.addEventListener('DOMContentLoaded', () => {
   const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
   tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
 
+  // 1.5 Universal Mobile & Desktop Sidebar Drawer Toggle for Students, Staff, and Admins
+  const sidebars = document.querySelectorAll('.admin-sidebar');
+  if (sidebars.length > 1) {
+    for (let i = 1; i < sidebars.length; i++) {
+      sidebars[i].remove();
+    }
+  }
+
+  const appSidebar = document.querySelector('.admin-sidebar');
+  const toggleBtns = document.querySelectorAll('#sidebarToggleBtn, .sidebar-toggle-trigger');
+
+  let backdrop = document.querySelector('.sidebar-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.className = 'sidebar-backdrop';
+    document.body.appendChild(backdrop);
+  }
+
+  let lastToggleTime = 0;
+  window.toggleAppSidebar = function(e, forceState) {
+    if (e) {
+      if (e.preventDefault) e.preventDefault();
+      if (e.stopPropagation) e.stopPropagation();
+    }
+
+    const now = Date.now();
+    if (now - lastToggleTime < 250) return; // Prevent double trigger within 250ms
+    lastToggleTime = now;
+
+    const sidebar = document.querySelector('.admin-sidebar');
+    if (!sidebar) return;
+
+    const isShow = typeof forceState === 'boolean' ? forceState : !sidebar.classList.contains('show');
+    if (isShow) {
+      sidebar.classList.add('show');
+      backdrop.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    } else {
+      sidebar.classList.remove('show');
+      backdrop.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+  };
+
+  if (appSidebar) {
+    toggleBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => window.toggleAppSidebar(e));
+    });
+
+    backdrop.addEventListener('click', (e) => window.toggleAppSidebar(e, false));
+
+    const closeBtn = appSidebar.querySelector('.sidebar-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => window.toggleAppSidebar(e, false));
+    }
+
+    appSidebar.querySelectorAll('.sidebar-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 992 || appSidebar.parentElement === document.body || !document.querySelector('.admin-layout, .admin-wrapper')) {
+          window.toggleAppSidebar(null, false);
+        }
+      });
+    });
+  }
+
   // 2. Real-Time Live Search Suggestions
   setupLiveSearch('heroSearchInput', 'heroSearchSuggestions');
   setupLiveSearch('navbarSearchInput', 'navbarSearchSuggestions');

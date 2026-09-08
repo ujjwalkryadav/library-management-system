@@ -1,13 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Toggle mobile sidebar
-  const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
-  const adminSidebar = document.querySelector('.admin-sidebar');
-  if (sidebarToggleBtn && adminSidebar) {
-    sidebarToggleBtn.addEventListener('click', () => {
-      adminSidebar.classList.toggle('show');
-    });
-  }
-
   // Render Charts if data is provided
   if (window.LMS_CHART_DATA && typeof Chart !== 'undefined') {
     const { monthlyTrends, categories } = window.LMS_CHART_DATA;

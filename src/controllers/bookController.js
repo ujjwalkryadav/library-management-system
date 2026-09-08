@@ -48,7 +48,7 @@ async function searchSuggestions(req, res) {
 
 async function listBooks(req, res, next) {
   try {
-    const { search, category, author, availability } = req.query;
+    const { search, category, author, availability, sort } = req.query;
     const { page, limit, skip } = getPaginationParams(req, 12);
 
     const { books, total } = await bookService.getBooks({
@@ -56,6 +56,7 @@ async function listBooks(req, res, next) {
       categoryId: category,
       authorId: author,
       availability,
+      sort: sort || 'newest',
       skip,
       limit
     });
@@ -81,7 +82,8 @@ async function listBooks(req, res, next) {
       search: search || '',
       selectedCategory: category || '',
       selectedAuthor: author || '',
-      selectedAvailability: availability || ''
+      selectedAvailability: availability || '',
+      selectedSort: sort || 'newest'
     });
   } catch (error) {
     next(error);

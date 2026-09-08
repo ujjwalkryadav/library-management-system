@@ -1,97 +1,103 @@
 <%- include('../partials/head.html') %>
-<%- include('../partials/navbar.html') %>
 
-<main class="container my-4 flex-grow-1">
-  <%- include('../partials/alerts.html') %>
+<div class="admin-layout">
+  <%- include('../partials/sidebar.html') %>
 
-  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-    <div>
-      <h2 class="fw-bold mb-1">My Borrowed Books</h2>
-      <p class="text-muted mb-0">Review books currently borrowed, monitor due dates, and request book renewals.</p>
-    </div>
-    <div>
-      <a href="/books" class="btn btn-primary d-flex align-items-center gap-2">
-        <i class="bi bi-search"></i> Browse Catalog
-      </a>
-    </div>
-  </div>
+  <div class="admin-main">
+    <%- include('../partials/student-topbar.html') %>
 
-  <div class="card shadow-sm">
-    <div class="card-body p-0">
-      <% if (issuedBooks && issuedBooks.length > 0) { %>
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th style="width: 60px;">Cover</th>
-                <th>Book Title & Details</th>
-                <th>Issue Date</th>
-                <th>Due Date</th>
-                <th>Renewals</th>
-                <th>Status / Due Alert</th>
-                <th class="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% issuedBooks.forEach(function(i) { %>
-                <tr>
-                  <td>
-                    <img src="<%= i.book.cover_image || '/images/default-cover.svg' %>" alt="Cover" width="44" height="60" class="rounded object-fit-cover shadow-sm border">
-                  </td>
-                  <td>
-                    <a href="/books/<%= i.book.id %>" class="fw-bold text-dark text-decoration-none d-block"><%= i.book.title %></a>
-                    <span class="small text-muted"><%= i.book.author.name %> &bull; <span class="badge bg-light text-secondary border"><%= i.book.category.name %></span></span>
-                  </td>
-                  <td><%= i.issue_date.toLocaleDateString('en-IN') %></td>
-                  <td>
-                    <span class="fw-bold text-dark"><%= i.due_date.toLocaleDateString('en-IN') %></span>
-                  </td>
-                  <td>
-                    <span class="badge bg-light text-dark border"><%= i.renewal_count %> / <%= systemSettings ? systemSettings.renewal_limit : 2 %></span>
-                  </td>
-                  <td>
-                    <% const daysRem = helpers.getDaysRemaining(i.due_date); %>
-                    <% if (i.status === 'OVERDUE') { %>
-                      <span class="due-badge due-danger">
-                        <i class="bi bi-exclamation-triangle"></i> <%= Math.abs(daysRem) %> days Overdue
-                      </span>
-                    <% } else if (daysRem <= 3) { %>
-                      <span class="due-badge due-warning">
-                        <i class="bi bi-clock"></i> Due in <%= daysRem %> day(s)
-                      </span>
-                    <% } else { %>
-                      <span class="due-badge due-ok">
-                        <i class="bi bi-check-circle"></i> Due in <%= daysRem %> days
-                      </span>
-                    <% } %>
-                  </td>
-                  <td class="text-end">
-                    <% if (i.renewal_count < (systemSettings ? systemSettings.renewal_limit : 2)) { %>
-                      <form action="/issues/<%= i.id %>/renew" method="POST" class="d-inline">
-                        <button type="submit" class="btn btn-outline-primary btn-sm" title="Extend due date by <%= systemSettings ? systemSettings.loan_period_days : 14 %> days">
-                          <i class="bi bi-arrow-clockwise me-1"></i> Renew Book
-                        </button>
-                      </form>
-                    <% } else { %>
-                      <span class="text-muted small">Max Renewals Reached</span>
-                    <% } %>
-                  </td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
+    <main class="admin-main-body">
+      <%- include('../partials/alerts.html') %>
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h3 class="fw-bold font-serif mb-1 text-dark">My Borrowed Books</h3>
+          <p class="text-muted small mb-0">Review books currently borrowed, monitor due dates, and request book renewals.</p>
         </div>
-      <% } else { %>
-        <div class="text-center py-5 text-muted">
-          <i class="bi bi-book fs-1 d-block mb-2 text-secondary"></i>
-          <h5 class="fw-bold">No books currently borrowed</h5>
-          <p class="text-muted mb-3">You do not have any borrowed books from the library right now.</p>
-          <a href="/books" class="btn btn-primary">Find a Book in the Catalog</a>
+        <div>
+          <a href="/books" class="btn btn-primary btn-sm d-flex align-items-center gap-2">
+            <i class="bi bi-search"></i> Browse Catalog
+          </a>
         </div>
-      <% } %>
-    </div>
+      </div>
+
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-0">
+          <% if (issuedBooks && issuedBooks.length > 0) { %>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 60px;">Cover</th>
+                    <th>Book Title & Details</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Renewals</th>
+                    <th>Status / Due Alert</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% issuedBooks.forEach(function(i) { %>
+                    <tr>
+                      <td>
+                        <img src="<%= i.book.cover_image || '/images/default-cover.svg' %>" alt="Cover" width="44" height="60" class="rounded object-fit-cover shadow-sm border">
+                      </td>
+                      <td>
+                        <a href="/books/<%= i.book.id %>" class="fw-bold text-dark text-decoration-none d-block"><%= i.book.title %></a>
+                        <span class="small text-muted"><%= i.book.author.name %> &bull; <span class="badge bg-light text-secondary border"><%= i.book.category.name %></span></span>
+                      </td>
+                      <td><%= i.issue_date.toLocaleDateString('en-IN') %></td>
+                      <td>
+                        <span class="fw-bold text-dark"><%= i.due_date.toLocaleDateString('en-IN') %></span>
+                      </td>
+                      <td>
+                        <span class="badge bg-light text-dark border"><%= i.renewal_count %> / <%= systemSettings ? systemSettings.renewal_limit : 2 %></span>
+                      </td>
+                      <td>
+                        <% const daysRem = helpers.getDaysRemaining(i.due_date); %>
+                        <% if (i.status === 'OVERDUE') { %>
+                          <span class="due-badge due-danger">
+                            <i class="bi bi-exclamation-triangle"></i> <%= Math.abs(daysRem) %> days Overdue
+                          </span>
+                        <% } else if (daysRem <= 3) { %>
+                          <span class="due-badge due-warning">
+                            <i class="bi bi-clock"></i> Due in <%= daysRem %> day(s)
+                          </span>
+                        <% } else { %>
+                          <span class="due-badge due-ok">
+                            <i class="bi bi-check-circle"></i> Due in <%= daysRem %> days
+                          </span>
+                        <% } %>
+                      </td>
+                      <td class="text-end">
+                        <% if (i.renewal_count < (systemSettings ? systemSettings.renewal_limit : 2)) { %>
+                          <form action="/issues/<%= i.id %>/renew" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-outline-primary btn-sm" title="Extend due date by <%= systemSettings ? systemSettings.loan_period_days : 14 %> days">
+                              <i class="bi bi-arrow-clockwise me-1"></i> Renew Book
+                            </button>
+                          </form>
+                        <% } else { %>
+                          <span class="text-muted small">Max Renewals Reached</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="text-center py-5 text-muted">
+              <i class="bi bi-book fs-1 d-block mb-2 text-secondary"></i>
+              <h5 class="fw-bold">No books currently borrowed</h5>
+              <p class="text-muted mb-3">You do not have any borrowed books from the library right now.</p>
+              <a href="/books" class="btn btn-primary btn-sm">Find a Book in the Catalog</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+
+    <%- include('../partials/footer.html') %>
   </div>
-
-</main>
-
-<%- include('../partials/footer.html') %>
+</div>

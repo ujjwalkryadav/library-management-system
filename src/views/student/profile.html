@@ -1,8 +1,13 @@
 <%- include('../partials/head.html') %>
-<%- include('../partials/navbar.html') %>
 
-<main class="container my-4 flex-grow-1">
-  <%- include('../partials/alerts.html') %>
+<div class="admin-layout">
+  <%- include('../partials/sidebar.html') %>
+
+  <div class="admin-main">
+    <%- include('../partials/student-topbar.html') %>
+
+    <main class="admin-main-body">
+      <%- include('../partials/alerts.html') %>
 
   <div class="mb-4">
     <h2 class="fw-bold mb-1">My Student Profile</h2>
@@ -117,6 +122,8 @@
     </div>
   </div>
 
-</main>
+    </main>
 
-<%- include('../partials/footer.html') %>
+    <%- include('../partials/footer.html') %>
+  </div>
+</div>

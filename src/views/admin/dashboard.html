@@ -9,7 +9,7 @@
     <!-- ======================================================== -->
     <header class="admin-topbar">
       <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-light d-lg-none border" type="button" id="sidebarToggleBtn">
+        <button class="btn btn-light d-lg-none border" type="button" id="sidebarToggleBtn" onclick="if(window.toggleAppSidebar) window.toggleAppSidebar(event)">
           <i class="bi bi-list"></i>
         </button>
 
@@ -59,6 +59,16 @@
             Welcome back, <%= currentUser.name.split(' ')[0] %>! 👋
           </h2>
           <p class="text-muted small mb-0">Here's what's happening in your library operations today.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/attendance/scanner" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm rounded-pill px-3">
+            <i class="bi bi-camera-fill"></i>
+            <span>Live QR Scanner</span>
+          </a>
+          <a href="/attendance/admin" class="btn btn-outline-secondary d-flex align-items-center gap-2 rounded-pill px-3">
+            <i class="bi bi-calendar-check"></i>
+            <span>Attendance</span>
+          </a>
         </div>
       </div>
 

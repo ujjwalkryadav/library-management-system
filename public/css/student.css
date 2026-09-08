@@ -1,17 +1,15 @@
-/* Student Portal Theme Stylesheet matching Greenfield College Library palette */
-
-.student-welcome-banner {
+.student-welcome-banner, .student-banner {
   background: linear-gradient(135deg, #0F382A 0%, #0B291E 100%);
   color: #FFFFFF;
   border-radius: var(--radius-lg);
-  padding: 2.25rem 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 8px 24px rgba(15, 56, 42, 0.12);
+  padding: 1.75rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 24px rgba(15, 56, 42, 0.15);
   position: relative;
   overflow: hidden;
 }
 
-.student-welcome-banner::after {
+.student-welcome-banner::after, .student-banner::after {
   content: '';
   position: absolute;
   top: -40px;
@@ -19,12 +17,38 @@
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(200, 157, 92, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(200, 157, 92, 0.25) 0%, transparent 70%);
+  pointer-events: none;
 }
 
-.student-welcome-banner h2 {
+.student-welcome-banner h2, .student-banner-title {
   font-family: var(--font-serif);
   font-weight: 700;
+  font-size: 1.65rem;
+  color: #FFFFFF;
+  margin-bottom: 0.35rem;
+}
+
+.student-banner-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+@media (max-width: 767.98px) {
+  .student-welcome-banner, .student-banner {
+    padding: 1.25rem 1rem;
+    border-radius: 16px;
+    margin-bottom: 1.25rem;
+  }
+
+  .student-welcome-banner h2, .student-banner-title {
+    font-size: 1.35rem;
+  }
+
+  .student-banner-subtitle {
+    font-size: 0.82rem;
+  }
 }
 
 /* Stat summary cards */

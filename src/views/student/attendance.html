@@ -1,0 +1,155 @@
+<%- include('../partials/head.html') %>
+
+<div class="admin-layout">
+  <%- include('../partials/sidebar.html') %>
+
+  <div class="admin-main">
+    <%- include('../partials/student-topbar.html') %>
+
+    <main class="admin-main-body">
+      <!-- Breadcrumb & Top Bar -->
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+              <li class="breadcrumb-item"><a href="/student/dashboard" class="text-decoration-none">Dashboard</a></li>
+              <li class="breadcrumb-item active text-dark" aria-current="page">My Attendance History</li>
+            </ol>
+          </nav>
+          <h3 class="fw-bold text-dark mb-0 font-serif">
+            <i class="bi bi-clock-history text-primary me-2"></i> My Library Visits & Attendance Log
+          </h3>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/student/id-card" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+            <i class="bi bi-qr-code-scan me-1"></i> My QR ID Card
+          </a>
+        </div>
+      </div>
+
+      <%- include('../partials/alerts.html') %>
+
+      <!-- Student Attendance Summary Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4">
+          <div class="card bg-white border-0 shadow-sm p-3 rounded-3">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="text-muted small">VISITS THIS MONTH (<%= monthName.split(' ')[0] %>)</div>
+                <h3 class="fw-bold mb-0 text-dark"><%= totalMonthCount %> Days</h3>
+              </div>
+              <div class="p-3 bg-primary bg-opacity-10 rounded-circle text-primary fs-4">
+                <i class="bi bi-calendar-month"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4">
+          <div class="card bg-white border-0 shadow-sm p-3 rounded-3">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="text-muted small">TOTAL LIFETIME VISITS</div>
+                <h3 class="fw-bold mb-0 text-success"><%= totalPresentCount %> Visits</h3>
+              </div>
+              <div class="p-3 bg-success bg-opacity-10 rounded-circle text-success fs-4">
+                <i class="bi bi-check-circle"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card bg-white border-0 shadow-sm p-3 rounded-3">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="text-muted small">ENTRY METHOD</div>
+                <h3 class="fw-bold mb-0 text-primary">Instant QR Scan</h3>
+              </div>
+              <div class="p-3 bg-info bg-opacity-10 rounded-circle text-info fs-4">
+                <i class="bi bi-qr-code"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance Visit Log Table -->
+      <div class="card bg-white border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold text-dark mb-0">
+            <i class="bi bi-list-check me-2 text-primary"></i> Recent Library Visit Logs
+          </h6>
+          <span class="badge bg-secondary bg-opacity-25 text-dark small"><%= attendances.length %> Logged Visits</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light text-muted small">
+              <tr>
+                <th>DATE</th>
+                <th>CHECK-IN TIME</th>
+                <th>CHECK-OUT TIME</th>
+                <th>STATUS</th>
+                <th>SCAN TYPE</th>
+                <th>NOTES</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (attendances.length === 0) { %>
+                <tr>
+                  <td colspan="6" class="text-center py-5 text-muted">
+                    <i class="bi bi-calendar-x fs-1 d-block mb-2 text-secondary"></i>
+                    No attendance records logged yet. Show your QR Code at the library entrance gate!
+                  </td>
+                </tr>
+              <% } else { %>
+                <% attendances.forEach(att => { %>
+                  <tr>
+                    <td class="fw-bold text-dark">
+                      <i class="bi bi-calendar3 text-primary me-2"></i>
+                      <%= new Date(att.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) %>
+                    </td>
+                    <td>
+                      <span class="badge bg-light border text-dark">
+                        <i class="bi bi-box-arrow-in-right text-success me-1"></i>
+                        <%= new Date(att.check_in).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) %>
+                      </span>
+                    </td>
+                    <td>
+                      <% if (att.check_out) { %>
+                        <span class="badge bg-light border text-dark">
+                          <i class="bi bi-box-arrow-right text-info me-1"></i>
+                          <%= new Date(att.check_out).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) %>
+                        </span>
+                      <% } else { %>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                          In Session
+                        </span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (att.status === 'PRESENT') { %>
+                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">PRESENT</span>
+                      <% } else if (att.status === 'LATE') { %>
+                        <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25">LATE</span>
+                      <% } else { %>
+                        <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25"><%= att.status %></span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <span class="badge bg-secondary bg-opacity-25 text-dark small"><%= att.scan_mode %></span>
+                    </td>
+                    <td class="small text-muted">
+                      <%= att.notes || 'Normal visit' %>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <%- include('../partials/footer.html') %>
+  </div>
+</div>

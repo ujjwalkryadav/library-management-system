@@ -1,0 +1,162 @@
+<!-- Mobile Native App-Like Floating Bottom Navigation Dock -->
+<nav class="mobile-bottom-dock d-md-none" aria-label="Mobile Navigation">
+  <div class="mobile-dock-inner">
+    <% if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'STUDENT') { %>
+      <!-- Student Dock Items -->
+      <a href="/student/dashboard" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath === '/student/dashboard') ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-house-door-fill"></i>
+        </div>
+        <span class="dock-label">Home</span>
+      </a>
+
+      <a href="/books" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/books')) ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-book-half"></i>
+        </div>
+        <span class="dock-label">Catalog</span>
+      </a>
+
+      <!-- Center Action Button: Digital ID Card & QR -->
+      <a href="/student/id-card" class="dock-item dock-item-center <%= (typeof currentPath !== 'undefined' && currentPath === '/student/id-card') ? 'active' : '' %>">
+        <div class="dock-center-pill">
+          <i class="bi bi-qr-code-scan"></i>
+        </div>
+        <span class="dock-label">My ID QR</span>
+      </a>
+
+      <a href="/issues/student/my-books" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/issues/student')) ? 'active' : '' %>">
+        <div class="dock-icon-wrap position-relative">
+          <i class="bi bi-journal-bookmark-fill"></i>
+          <% if (typeof activeIssues !== 'undefined' && activeIssues && activeIssues.length > 0) { %>
+            <span class="dock-badge"><%= activeIssues.length %></span>
+          <% } %>
+        </div>
+        <span class="dock-label">My Loans</span>
+      </a>
+
+      <a href="/student/profile" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath === '/student/profile') ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-person-circle"></i>
+        </div>
+        <span class="dock-label">Profile</span>
+      </a>
+
+    <% } else if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'ADMIN') { %>
+      <!-- Admin Dock Items -->
+      <a href="/admin/dashboard" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath === '/admin/dashboard') ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-speedometer2"></i>
+        </div>
+        <span class="dock-label">Dashboard</span>
+      </a>
+
+      <a href="/books" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/books')) ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-bookshelf"></i>
+        </div>
+        <span class="dock-label">Books</span>
+      </a>
+
+      <!-- Center Action Button: Live QR Attendance Scanner -->
+      <a href="/attendance/scanner" class="dock-item dock-item-center <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/attendance/scanner')) ? 'active' : '' %>">
+        <div class="dock-center-pill dock-center-scanner">
+          <i class="bi bi-camera-fill"></i>
+        </div>
+        <span class="dock-label">Scan QR</span>
+      </a>
+
+      <a href="/attendance/admin" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/attendance') && !currentPath.includes('scanner')) ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-calendar-check-fill"></i>
+        </div>
+        <span class="dock-label">Attendance</span>
+      </a>
+
+      <a href="/admin/settings" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/settings')) ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-sliders"></i>
+        </div>
+        <span class="dock-label">Settings</span>
+      </a>
+
+    <% } else if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'EMPLOYEE') { %>
+      <!-- Employee Staff Dock Items -->
+      <a href="/employee/dashboard" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath === '/employee/dashboard') ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-speedometer2"></i>
+        </div>
+        <span class="dock-label">Desk</span>
+      </a>
+
+      <a href="/books" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/books')) ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-bookshelf"></i>
+        </div>
+        <span class="dock-label">Books</span>
+      </a>
+
+      <!-- Center Action Button: Live QR Attendance Scanner -->
+      <a href="/attendance/scanner" class="dock-item dock-item-center <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/attendance/scanner')) ? 'active' : '' %>">
+        <div class="dock-center-pill dock-center-scanner">
+          <i class="bi bi-camera-fill"></i>
+        </div>
+        <span class="dock-label">Scan QR</span>
+      </a>
+
+      <a href="/attendance/admin" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/attendance') && !currentPath.includes('scanner')) ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-calendar-check-fill"></i>
+        </div>
+        <span class="dock-label">Attendance</span>
+      </a>
+
+      <a href="/notifications" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath === '/notifications') ? 'active' : '' %>">
+        <div class="dock-icon-wrap position-relative">
+          <i class="bi bi-bell-fill"></i>
+          <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
+            <span class="dock-badge"><%= unreadCount %></span>
+          <% } %>
+        </div>
+        <span class="dock-label">Alerts</span>
+      </a>
+
+    <% } else { %>
+      <!-- Public / Guest Dock Items -->
+      <a href="/" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath === '/') ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-house-door-fill"></i>
+        </div>
+        <span class="dock-label">Home</span>
+      </a>
+
+      <a href="/books" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/books')) ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-book-half"></i>
+        </div>
+        <span class="dock-label">Catalog</span>
+      </a>
+
+      <a href="/login?role=student" class="dock-item dock-item-center">
+        <div class="dock-center-pill">
+          <i class="bi bi-box-arrow-in-right"></i>
+        </div>
+        <span class="dock-label">Login</span>
+      </a>
+
+      <a href="/register" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath === '/register') ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-person-plus-fill"></i>
+        </div>
+        <span class="dock-label">Register</span>
+      </a>
+
+      <a href="/login?role=admin" class="dock-item <%= (typeof currentPath !== 'undefined' && currentPath.includes('role=admin')) ? 'active' : '' %>">
+        <div class="dock-icon-wrap">
+          <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <span class="dock-label">Admin</span>
+      </a>
+    <% } %>
+  </div>
+</nav>

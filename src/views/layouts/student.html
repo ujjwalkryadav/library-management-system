@@ -1,9 +1,16 @@
 <%- include('../partials/head.html') %>
-<%- include('../partials/navbar.html') %>
 
-<main class="container my-4 flex-grow-1">
-  <%- include('../partials/alerts.html') %>
-  <%- body %>
-</main>
+<div class="admin-layout">
+  <%- include('../partials/sidebar.html') %>
 
-<%- include('../partials/footer.html') %>
+  <div class="admin-main">
+    <%- include('../partials/student-topbar.html') %>
+
+    <main class="admin-main-body">
+      <%- include('../partials/alerts.html') %>
+      <%- body %>
+    </main>
+
+    <%- include('../partials/footer.html') %>
+  </div>
+</div>

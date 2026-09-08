@@ -35,6 +35,7 @@ async function registerStudent(data) {
       student_profile: {
         create: {
           student_id: studentId.trim(),
+          qr_code_token: `QR-STU-${studentId.trim()}`,
           enrollment_number: enrollmentNumber ? enrollmentNumber.trim() : null,
           department: department.trim(),
           course: course.trim(),

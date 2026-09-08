@@ -1,172 +1,328 @@
-<aside class="admin-sidebar">
+<aside class="admin-sidebar" id="appSidebar">
   <!-- Brand Header -->
   <div class="admin-sidebar-header">
-    <img src="/images/logo.svg" alt="Logo" width="34" height="34">
-    <div>
-      <div class="brand-title"><%= systemSettings ? systemSettings.library_name : 'Library Management System' %></div>
-      <div class="brand-subtitle"><%= currentUser && currentUser.role === 'ADMIN' ? 'ADMIN CONSOLE' : 'STAFF PORTAL' %></div>
+    <div class="d-flex align-items-center justify-content-between w-100">
+      <div class="d-flex align-items-center gap-2">
+        <img src="/images/logo.svg" alt="Logo" width="34" height="34">
+        <div>
+          <div class="brand-title"><%= systemSettings ? systemSettings.library_name : 'Central Library' %></div>
+          <div class="brand-subtitle">
+            <% if (currentUser.role === 'ADMIN') { %>
+              ADMIN CONSOLE
+            <% } else if (currentUser.role === 'EMPLOYEE') { %>
+              STAFF OPERATIONS
+            <% } else { %>
+              STUDENT PORTAL
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-sm text-white-50 d-lg-none p-0 border-0 sidebar-close-btn" aria-label="Close sidebar">
+        <i class="bi bi-x-lg fs-5"></i>
+      </button>
     </div>
   </div>
 
   <!-- Sidebar Nav Links -->
   <div class="sidebar-nav">
-    <!-- Dashboard -->
-    <% if (currentUser.role === 'ADMIN') { %>
-      <a href="/admin/dashboard" class="sidebar-link <%= currentPath === '/admin/dashboard' ? 'active' : '' %>">
+    <% if (currentUser.role === 'STUDENT') { %>
+      <!-- ============================================ -->
+      <!-- STUDENT NAVIGATION                           -->
+      <!-- ============================================ -->
+      <a href="/student/dashboard" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath === '/student/dashboard') ? 'active' : '' %>">
         <div class="link-content">
           <i class="bi bi-grid-fill"></i>
           <span>Dashboard</span>
         </div>
       </a>
-    <% } else { %>
-      <a href="/employee/dashboard" class="sidebar-link <%= currentPath === '/employee/dashboard' ? 'active' : '' %>">
+
+      <a href="/student/id-card" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath === '/student/id-card') ? 'active' : '' %>">
         <div class="link-content">
-          <i class="bi bi-grid-fill"></i>
-          <span>My Operations</span>
+          <i class="bi bi-qr-code-scan text-info"></i>
+          <span>Digital QR ID Card</span>
+        </div>
+        <span class="badge bg-primary rounded-pill small" style="font-size: 0.65rem;">PASS</span>
+      </a>
+
+      <a href="/student/attendance" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath === '/student/attendance') ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-clock-history text-success"></i>
+          <span>My Attendance Log</span>
         </div>
       </a>
-    <% } %>
 
-    <!-- MANAGE SECTION -->
-    <div class="sidebar-section-title">Manage</div>
+      <div class="sidebar-section-title">My Library</div>
 
-    <% if (hasPermission('books.view')) { %>
-      <a href="/books" class="sidebar-link <%= currentPath.startsWith('/books') ? 'active' : '' %>">
-        <div class="link-content">
-          <i class="bi bi-book"></i>
-          <span>Books</span>
-        </div>
-        <i class="bi bi-chevron-right small text-muted"></i>
-      </a>
-    <% } %>
-
-    <% if (hasPermission('categories.view')) { %>
-      <a href="/admin/categories" class="sidebar-link <%= currentPath.startsWith('/admin/categories') ? 'active' : '' %>">
-        <div class="link-content">
-          <i class="bi bi-folder2-open"></i>
-          <span>Categories</span>
-        </div>
-      </a>
-    <% } %>
-
-    <% if (hasPermission('authors.view')) { %>
-      <a href="/admin/authors" class="sidebar-link <%= currentPath.startsWith('/admin/authors') ? 'active' : '' %>">
-        <div class="link-content">
-          <i class="bi bi-pen"></i>
-          <span>Authors</span>
-        </div>
-      </a>
-    <% } %>
-
-    <% if (hasPermission('students.view')) { %>
-      <a href="/admin/students" class="sidebar-link <%= currentPath.startsWith('/admin/students') ? 'active' : '' %>">
-        <div class="link-content">
-          <i class="bi bi-people"></i>
-          <span>Students</span>
-        </div>
-      </a>
-    <% } %>
-
-    <% if (currentUser.role === 'ADMIN') { %>
-      <a href="/admin/employees" class="sidebar-link <%= currentPath.startsWith('/admin/employees') ? 'active' : '' %>">
-        <div class="link-content">
-          <i class="bi bi-person-badge"></i>
-          <span>Employees</span>
-        </div>
-      </a>
-    <% } %>
-
-    <% if (hasPermission('requests.view')) { %>
-      <a href="/requests/admin" class="sidebar-link <%= currentPath.startsWith('/requests') ? 'active' : '' %>">
-        <div class="link-content">
-          <i class="bi bi-envelope-paper"></i>
-          <span>Book Requests</span>
-        </div>
-      </a>
-    <% } %>
-
-    <% if (hasPermission('issues.view')) { %>
-      <a href="/issues/admin" class="sidebar-link <%= currentPath.startsWith('/issues/admin') && !query.status ? 'active' : '' %>">
+      <a href="/issues/student/my-books" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/issues/student')) ? 'active' : '' %>">
         <div class="link-content">
           <i class="bi bi-journal-bookmark"></i>
-          <span>Issued Books</span>
+          <span>Borrowed Books</span>
         </div>
       </a>
-    <% } %>
 
-    <% if (hasPermission('issues.return')) { %>
-      <a href="/issues/admin?status=RETURNED" class="sidebar-link <%= query.status === 'RETURNED' ? 'active' : '' %>">
-        <div class="link-content">
-          <i class="bi bi-arrow-return-left"></i>
-          <span>Returns</span>
-        </div>
-      </a>
-    <% } %>
-
-    <!-- FINANCE SECTION -->
-    <% if (hasPermission('fines.view')) { %>
-      <div class="sidebar-section-title">Finance & Fees</div>
-
-      <a href="/memberships/admin" class="sidebar-link <%= currentPath.startsWith('/memberships/admin') ? 'active' : '' %>">
+      <a href="/memberships/student" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/memberships/student')) ? 'active' : '' %>">
         <div class="link-content">
           <i class="bi bi-credit-card-2-front"></i>
-          <span>Memberships & Fees</span>
+          <span>Membership & Fees</span>
         </div>
       </a>
 
-      <a href="/fines/admin" class="sidebar-link <%= currentPath.startsWith('/fines/admin') && !query.status ? 'active' : '' %>">
+      <a href="/fines/student" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/fines/student')) ? 'active' : '' %>">
         <div class="link-content">
           <i class="bi bi-cash-stack"></i>
           <span>Overdue Fines</span>
         </div>
       </a>
 
-      <a href="/fines/admin?status=PAID" class="sidebar-link <%= query.status === 'PAID' ? 'active' : '' %>">
+      <a href="/requests/student" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/requests/student')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-envelope-paper"></i>
+          <span>Book Requests</span>
+        </div>
+      </a>
+
+      <a href="/books" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/books')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-search"></i>
+          <span>Browse Catalog</span>
+        </div>
+      </a>
+
+      <div class="sidebar-section-title">Account</div>
+
+      <a href="/student/profile" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath === '/student/profile') ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-person-circle"></i>
+          <span>My Profile</span>
+        </div>
+      </a>
+
+      <a href="/notifications" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath === '/notifications') ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-bell"></i>
+          <span>Notifications</span>
+        </div>
+        <% if (typeof unreadNotificationCount !== 'undefined' && unreadNotificationCount > 0) { %>
+          <span class="badge bg-danger rounded-pill" style="font-size: 0.65rem;"><%= unreadNotificationCount %></span>
+        <% } %>
+      </a>
+
+    <% } else if (currentUser.role === 'EMPLOYEE') { %>
+      <!-- ============================================ -->
+      <!-- EMPLOYEE / STAFF NAVIGATION                  -->
+      <!-- ============================================ -->
+      <a href="/employee/dashboard" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath === '/employee/dashboard') ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-grid-fill"></i>
+          <span>My Operations</span>
+        </div>
+      </a>
+
+      <div class="sidebar-section-title">Attendance & QR</div>
+
+      <a href="/attendance/scanner" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/attendance/scanner')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-camera-fill text-info"></i>
+          <span>Live QR Scanner</span>
+        </div>
+        <span class="badge bg-primary rounded-pill small" style="font-size: 0.65rem;">LIVE</span>
+      </a>
+
+      <a href="/attendance/admin" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/attendance') && !currentPath.includes('scanner')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-calendar-check-fill text-success"></i>
+          <span>Attendance Ledger</span>
+        </div>
+      </a>
+
+      <div class="sidebar-section-title">Circulation & Desk</div>
+
+      <a href="/books" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/books')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-book"></i>
+          <span>Books Catalog</span>
+        </div>
+      </a>
+
+      <a href="/issues/admin" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/issues/admin') && !(typeof query !== 'undefined' && query.status === 'RETURNED')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-journal-bookmark"></i>
+          <span>Issued Books</span>
+        </div>
+      </a>
+
+      <a href="/issues/admin?status=RETURNED" class="sidebar-link <%= (typeof query !== 'undefined' && query.status === 'RETURNED') ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-arrow-return-left"></i>
+          <span>Return Book</span>
+        </div>
+      </a>
+
+      <a href="/requests/admin" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/requests')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-envelope-paper"></i>
+          <span>Student Requests</span>
+        </div>
+      </a>
+
+      <a href="/fines/admin" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/fines/admin')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-cash-stack"></i>
+          <span>Overdue Fines</span>
+        </div>
+      </a>
+
+      <div class="sidebar-section-title">System</div>
+
+      <a href="/notifications" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/notifications')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-bell"></i>
+          <span>Notifications</span>
+        </div>
+      </a>
+
+    <% } else { %>
+      <!-- ============================================ -->
+      <!-- ADMIN FULL CONSOLE NAVIGATION                -->
+      <!-- ============================================ -->
+      <a href="/admin/dashboard" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath === '/admin/dashboard') ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-grid-fill"></i>
+          <span>Dashboard</span>
+        </div>
+      </a>
+
+      <!-- ATTENDANCE & QR SECTION -->
+      <div class="sidebar-section-title">Attendance & QR</div>
+
+      <a href="/attendance/scanner" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/attendance/scanner')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-camera-fill text-info"></i>
+          <span>QR Scanner</span>
+        </div>
+        <span class="badge bg-primary rounded-pill small" style="font-size: 0.65rem;">LIVE</span>
+      </a>
+
+      <a href="/attendance/admin" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/attendance') && !currentPath.includes('scanner')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-calendar-check-fill text-success"></i>
+          <span>Attendance Ledger</span>
+        </div>
+      </a>
+
+      <!-- MANAGE SECTION -->
+      <div class="sidebar-section-title">Manage</div>
+
+      <a href="/books" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/books')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-book"></i>
+          <span>Books Catalog</span>
+        </div>
+      </a>
+
+      <a href="/admin/categories" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/categories')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-folder2-open"></i>
+          <span>Categories</span>
+        </div>
+      </a>
+
+      <a href="/admin/authors" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/authors')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-pen"></i>
+          <span>Authors</span>
+        </div>
+      </a>
+
+      <a href="/admin/students" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/students')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-people"></i>
+          <span>Students</span>
+        </div>
+      </a>
+
+      <a href="/admin/employees" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/employees')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-person-badge"></i>
+          <span>Employees</span>
+        </div>
+      </a>
+
+      <a href="/requests/admin" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/requests')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-envelope-paper"></i>
+          <span>Book Requests</span>
+        </div>
+      </a>
+
+      <a href="/issues/admin" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/issues/admin') && !(typeof query !== 'undefined' && query.status === 'RETURNED')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-journal-bookmark"></i>
+          <span>Issued Books</span>
+        </div>
+      </a>
+
+      <a href="/issues/admin?status=RETURNED" class="sidebar-link <%= (typeof query !== 'undefined' && query.status === 'RETURNED') ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-arrow-return-left"></i>
+          <span>Returns</span>
+        </div>
+      </a>
+
+      <!-- FINANCE SECTION -->
+      <div class="sidebar-section-title">Finance & Fees</div>
+
+      <a href="/memberships/admin" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/memberships/admin')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-credit-card-2-front"></i>
+          <span>Memberships & Fees</span>
+        </div>
+      </a>
+
+      <a href="/fines/admin" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/fines/admin') && !(typeof query !== 'undefined' && query.status === 'PAID')) ? 'active' : '' %>">
+        <div class="link-content">
+          <i class="bi bi-cash-stack"></i>
+          <span>Overdue Fines</span>
+        </div>
+      </a>
+
+      <a href="/fines/admin?status=PAID" class="sidebar-link <%= (typeof query !== 'undefined' && query.status === 'PAID') ? 'active' : '' %>">
         <div class="link-content">
           <i class="bi bi-receipt"></i>
           <span>Fine Receipts</span>
         </div>
       </a>
-    <% } %>
 
-    <!-- SYSTEM SECTION -->
-    <div class="sidebar-section-title">System</div>
+      <!-- SYSTEM SECTION -->
+      <div class="sidebar-section-title">System</div>
 
-    <% if (hasPermission('notifications.view')) { %>
-      <a href="/notifications" class="sidebar-link <%= currentPath.startsWith('/notifications') ? 'active' : '' %>">
+      <a href="/notifications" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/notifications')) ? 'active' : '' %>">
         <div class="link-content">
           <i class="bi bi-bell"></i>
           <span>Notifications</span>
         </div>
-        <% if (unreadNotificationCount > 0) { %>
+        <% if (typeof unreadNotificationCount !== 'undefined' && unreadNotificationCount > 0) { %>
           <span class="badge bg-danger rounded-pill" style="font-size: 0.65rem;"><%= unreadNotificationCount %></span>
         <% } %>
       </a>
-    <% } %>
 
-    <% if (hasPermission('reports.view')) { %>
-      <a href="/admin/transactions" class="sidebar-link <%= currentPath.startsWith('/admin/transactions') ? 'active' : '' %>">
+      <a href="/admin/transactions" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/transactions')) ? 'active' : '' %>">
         <div class="link-content">
           <i class="bi bi-file-earmark-bar-graph"></i>
           <span>Reports & Audits</span>
         </div>
       </a>
-    <% } %>
 
-    <% if (currentUser.role === 'ADMIN') { %>
-      <a href="/admin/settings" class="sidebar-link <%= currentPath.startsWith('/admin/settings') ? 'active' : '' %>">
+      <a href="/admin/settings" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/settings')) ? 'active' : '' %>">
         <div class="link-content">
           <i class="bi bi-sliders"></i>
           <span>Settings</span>
         </div>
       </a>
-    <% } %>
 
-    <!-- ACCOUNT SECTION -->
-    <div class="sidebar-section-title">Account</div>
+      <div class="sidebar-section-title">Account</div>
 
-    <% if (currentUser.role === 'ADMIN') { %>
-      <a href="/admin/profile" class="sidebar-link <%= currentPath === '/admin/profile' ? 'active' : '' %>">
+      <a href="/admin/profile" class="sidebar-link <%= (typeof currentPath !== 'undefined' && currentPath === '/admin/profile') ? 'active' : '' %>">
         <div class="link-content">
           <i class="bi bi-person-gear"></i>
           <span>Admin Profile</span>
@@ -174,7 +330,8 @@
       </a>
     <% } %>
 
-    <form action="/logout" method="POST" class="m-0">
+    <!-- Sign Out for All Roles -->
+    <form action="/logout" method="POST" class="m-0 mt-3 pt-2 border-top border-secondary border-opacity-25">
       <button type="submit" class="sidebar-link text-start w-100 bg-transparent border-0 text-danger">
         <div class="link-content">
           <i class="bi bi-box-arrow-right text-danger"></i>
@@ -184,7 +341,7 @@
     </form>
   </div>
 
-  <!-- Bottom User Profile Footer matching Reference Image 3 -->
+  <!-- Bottom User Profile Footer -->
   <div class="sidebar-footer">
     <div class="sidebar-user-card">
       <div class="d-flex align-items-center gap-2">
@@ -194,7 +351,13 @@
         <div class="overflow-hidden" style="max-width: 140px;">
           <div class="text-white text-truncate fw-semibold small"><%= currentUser.name %></div>
           <div class="text-muted text-truncate" style="font-size: 0.7rem;">
-            <%= currentUser.role === 'ADMIN' ? 'Super Administrator' : (currentUser.employee_profile ? currentUser.employee_profile.designation : 'Staff Member') %>
+            <% if (currentUser.role === 'ADMIN') { %>
+              Super Administrator
+            <% } else if (currentUser.role === 'EMPLOYEE') { %>
+              <%= currentUser.employee_profile ? currentUser.employee_profile.designation : 'Staff Member' %>
+            <% } else { %>
+              Student Member
+            <% } %>
           </div>
         </div>
       </div>

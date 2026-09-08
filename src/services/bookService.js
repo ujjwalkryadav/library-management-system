@@ -1,6 +1,6 @@
 const { prisma } = require('../config/database');
 
-async function getBooks({ search = '', categoryId, authorId, availability, isArchived = false, skip = 0, limit = 10 }) {
+async function getBooks({ search = '', categoryId, authorId, availability, sort = 'newest', isArchived = false, skip = 0, limit = 10 }) {
   const where = {
     is_archived: isArchived
   };
@@ -26,9 +26,14 @@ async function getBooks({ search = '', categoryId, authorId, availability, isArc
 
   if (availability === 'available') {
     where.available_copies = { gt: 0 };
-  } else if (availability === 'out_of_stock') {
+  } else if (availability === 'unavailable' || availability === 'out_of_stock') {
     where.available_copies = { equals: 0 };
   }
+
+  let orderBy = { created_at: 'desc' };
+  if (sort === 'title_asc') orderBy = { title: 'asc' };
+  else if (sort === 'title_desc') orderBy = { title: 'desc' };
+  else if (sort === 'popular') orderBy = { total_copies: 'desc' };
 
   const [books, total] = await Promise.all([
     prisma.book.findMany({
@@ -43,7 +48,7 @@ async function getBooks({ search = '', categoryId, authorId, availability, isArc
           }
         }
       },
-      orderBy: { created_at: 'desc' },
+      orderBy,
       skip,
       take: limit
     }),

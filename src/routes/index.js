@@ -11,6 +11,7 @@ const issueRoutes = require('./issueRoutes');
 const fineRoutes = require('./fineRoutes');
 const membershipRoutes = require('./membershipRoutes');
 const notificationRoutes = require('./notificationRoutes');
+const attendanceRoutes = require('./attendanceRoutes');
 const homeController = require('../controllers/homeController');
 
 // Homepage
@@ -23,6 +24,7 @@ router.use('/requests', requestRoutes);
 router.use('/issues', issueRoutes);
 router.use('/fines', fineRoutes);
 router.use('/memberships', membershipRoutes);
+router.use('/attendance', attendanceRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/admin', adminRoutes);
 router.use('/employee', employeeRoutes);

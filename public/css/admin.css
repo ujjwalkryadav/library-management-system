@@ -38,6 +38,25 @@
   border-right: 1px solid #0B291E;
 }
 
+/* Sidebar drawer when rendered at root (for students, public catalog, or standalone views) */
+body > .admin-sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 280px !important;
+  max-width: 85vw !important;
+  height: 100vh !important;
+  z-index: 1070 !important;
+  transform: translateX(-100%) !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+body > .admin-sidebar.show {
+  transform: translateX(0) !important;
+}
+
 .sidebar-nav {
   padding: 1rem 0.85rem 1.5rem;
   flex-grow: 1;
@@ -384,13 +403,129 @@
   color: #FFFFFF;
 }
 
-@media (max-width: 991px) {
-  .admin-sidebar {
-    position: fixed;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
+/* ======================================================== */
+/* MOBILE & TABLET RESPONSIVE OVERRIDES                    */
+/* ======================================================== */
+@media (max-width: 991.98px) {
+  .admin-layout, .admin-wrapper {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 100vh !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
   }
+
+  .admin-main, .admin-content {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    min-height: 100vh !important;
+  }
+
+  .admin-main-body, main {
+    padding: 1rem 0.85rem !important;
+    padding-bottom: 95px !important;
+  }
+
+  .admin-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 280px !important;
+    max-width: 85vw !important;
+    z-index: 1060 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5) !important;
+  }
+
   .admin-sidebar.show {
-    transform: translateX(0);
+    transform: translateX(0) !important;
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1055;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .sidebar-backdrop.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .admin-topbar {
+    padding: 0.65rem 0.85rem !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1030 !important;
+  }
+
+  .topbar-search {
+    width: 100% !important;
+    max-width: 200px !important;
+  }
+
+  .topbar-search input {
+    font-size: 0.82rem;
+    padding: 0.4rem 0.6rem 0.4rem 2rem;
+  }
+
+  .kpi-card {
+    padding: 0.85rem 0.8rem !important;
+    gap: 10px !important;
+  }
+
+  .kpi-icon {
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 1.15rem !important;
+  }
+
+  .kpi-value {
+    font-size: 1.25rem !important;
+  }
+
+  .kpi-title {
+    font-size: 0.72rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-main-body, main {
+    padding: 0.75rem 0.65rem !important;
+    padding-bottom: 90px !important;
+  }
+
+  .dash-card-header {
+    padding: 0.75rem 0.85rem !important;
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 6px;
+  }
+
+  .dash-card-title {
+    font-size: 0.95rem !important;
+  }
+
+  .table-responsive {
+    border-radius: 8px;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.04);
+  }
+
+  .table th, .table td {
+    padding: 0.6rem 0.5rem !important;
+    font-size: 0.8rem !important;
   }
 }

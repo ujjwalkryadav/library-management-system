@@ -1,0 +1,691 @@
+<%- include('../../partials/head.html') %>
+<!-- HTML5 QR Code Camera Scanner Library -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+  .scanner-viewport-box {
+    position: relative;
+    background: #0f172a;
+    border: 2px dashed rgba(59, 130, 246, 0.4);
+    border-radius: 20px;
+    overflow: hidden;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+  #reader {
+    width: 100% !important;
+    border: none !important;
+    background: transparent !important;
+  }
+  #reader video {
+    border-radius: 16px;
+    object-fit: cover;
+    max-height: 380px;
+  }
+  .scanner-laser {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #00f2fe, #4facfe, transparent);
+    box-shadow: 0 0 15px #00f2fe, 0 0 25px #4facfe;
+    animation: scanLaser 2.2s ease-in-out infinite alternate;
+    z-index: 10;
+    pointer-events: none;
+  }
+  @keyframes scanLaser {
+    0% { top: 8%; opacity: 0.8; }
+    100% { top: 90%; opacity: 0.8; }
+  }
+  .scanner-overlay-corners {
+    position: absolute;
+    inset: 20px;
+    border: 2px solid transparent;
+    pointer-events: none;
+    z-index: 9;
+  }
+  .scanner-corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-color: #38bdf8;
+    border-style: solid;
+  }
+  .top-left { top: 0; left: 0; border-width: 4px 0 0 4px; border-radius: 6px 0 0 0; }
+  .top-right { top: 0; right: 0; border-width: 4px 4px 0 0; border-radius: 0 6px 0 0; }
+  .bottom-left { bottom: 0; left: 0; border-width: 0 0 4px 4px; border-radius: 0 0 0 6px; }
+  .bottom-right { bottom: 0; right: 0; border-width: 0 4px 4px 0; border-radius: 0 0 6px 0; }
+
+  .result-card-anim {
+    animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes slideInUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+</style>
+
+<div class="admin-layout">
+  <%- include('../../partials/sidebar.html') %>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-light d-lg-none border" type="button" id="sidebarToggleBtn" onclick="if(window.toggleAppSidebar) window.toggleAppSidebar(event)">
+          <i class="bi bi-list"></i>
+        </button>
+        <span class="badge <%= currentUser.role === 'ADMIN' ? 'bg-danger' : 'badge-gold text-dark' %> px-3 py-2 fw-semibold">
+          <i class="bi bi-camera-fill me-1"></i> Live Attendance QR Scanner
+        </span>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <a href="/attendance/admin" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-calendar-check me-1"></i> Attendance Ledger
+        </a>
+        <%- include('../../partials/notifications-dropdown.html') %>
+      </div>
+    </header>
+
+    <main class="admin-main-body">
+    <!-- Breadcrumb & Top Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-1">
+            <li class="breadcrumb-item">
+              <a href="<%= currentUser.role === 'ADMIN' ? '/admin/dashboard' : '/employee/dashboard' %>" class="text-decoration-none">
+                <%= currentUser.role === 'ADMIN' ? 'Admin' : 'Staff' %>
+              </a>
+            </li>
+            <li class="breadcrumb-item"><a href="/attendance/admin" class="text-decoration-none">Attendance</a></li>
+            <li class="breadcrumb-item active text-light" aria-current="page">Live Scanner</li>
+          </ol>
+        </nav>
+        <h2 class="h4 fw-bold text-white mb-0">
+          <i class="bi bi-camera-fill text-primary me-2"></i> Real-Time QR & Barcode Attendance Scanner
+        </h2>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/attendance/admin" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="bi bi-calendar-check me-1"></i> Attendance Ledger
+        </a>
+      </div>
+    </div>
+
+    <%- include('../../partials/alerts.html') %>
+
+    <!-- KPI Quick Counters Bar -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="card bg-dark-card border-0 shadow-sm p-3 text-light">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted small">TOTAL REGISTERED</div>
+              <h3 class="fw-bold mb-0 text-white"><%= stats.totalStudents %></h3>
+            </div>
+            <div class="p-3 bg-primary bg-opacity-10 rounded-circle text-primary fs-4">
+              <i class="bi bi-people"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card bg-dark-card border-0 shadow-sm p-3 text-light">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted small">PRESENT TODAY</div>
+              <h3 class="fw-bold mb-0 text-success" id="counterPresentToday"><%= stats.todayPresentCount %></h3>
+            </div>
+            <div class="p-3 bg-success bg-opacity-10 rounded-circle text-success fs-4">
+              <i class="bi bi-check-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card bg-dark-card border-0 shadow-sm p-3 text-light">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted small">CHECKED OUT</div>
+              <h3 class="fw-bold mb-0 text-info" id="counterCheckedOut"><%= stats.todayCheckedOutCount %></h3>
+            </div>
+            <div class="p-3 bg-info bg-opacity-10 rounded-circle text-info fs-4">
+              <i class="bi bi-box-arrow-right"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card bg-dark-card border-0 shadow-sm p-3 text-light">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted small">ATTENDANCE RATE</div>
+              <h3 class="fw-bold mb-0 text-warning" id="counterRate"><%= stats.attendanceRate %>%</h3>
+            </div>
+            <div class="p-3 bg-warning bg-opacity-10 rounded-circle text-warning fs-4">
+              <i class="bi bi-pie-chart"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main 2-Column Section: Camera Scanner (Left) & Live Result Card (Right) -->
+    <div class="row g-4">
+      
+      <!-- Left: Camera Viewport & Fallback Manual Input -->
+      <div class="col-lg-6">
+        <div class="card bg-dark-card border-0 shadow-sm p-4 h-100 text-light">
+          
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h5 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
+              <span id="cameraPulseIndicator" class="spinner-grow spinner-grow-sm text-danger" role="status"></span>
+              Live Camera Feed
+            </h5>
+            <div class="d-flex gap-2">
+              <button id="restartCameraBtn" class="btn btn-outline-info btn-sm rounded-pill px-3" title="Restart / Force Camera On">
+                <i class="bi bi-camera-video me-1"></i> <span id="restartCameraBtnText">Force Camera On</span>
+              </button>
+              <button id="toggleCameraBtn" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-repeat me-1"></i> Switch Camera
+              </button>
+            </div>
+          </div>
+
+          <!-- Scanner Viewport Frame -->
+          <div class="scanner-viewport-box mb-3 position-relative" id="scannerViewport">
+            <!-- Camera Permission Overlay (Prompts user if permission needed or camera off) -->
+            <div id="cameraPermissionPrompt" class="position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-center" style="top: 0; left: 0; background: rgba(15, 23, 42, 0.94); z-index: 25; backdrop-filter: blur(4px);">
+              <div class="p-3 bg-primary bg-opacity-25 text-primary rounded-circle fs-1 mb-3 animate-pulse">
+                <i class="bi bi-camera-fill"></i>
+              </div>
+              <h5 class="fw-bold text-white mb-2">Camera Access Required</h5>
+              <p class="text-white-50 small mb-4" style="max-width: 320px;">
+                To scan Student QR Codes and record real-time library attendance, please allow camera permission on this device.
+              </p>
+              <button type="button" id="grantCameraPermissionBtn" class="btn btn-primary px-4 py-2 fw-semibold rounded-pill shadow-lg d-flex align-items-center gap-2">
+                <i class="bi bi-camera-video-fill"></i>
+                <span>Allow & Turn On Camera</span>
+              </button>
+            </div>
+
+            <div class="scanner-laser" id="scannerLaser" style="display: none;"></div>
+            <div class="scanner-overlay-corners">
+              <div class="scanner-corner top-left"></div>
+              <div class="scanner-corner top-right"></div>
+              <div class="scanner-corner bottom-left"></div>
+              <div class="scanner-corner bottom-right"></div>
+            </div>
+            <div id="reader"></div>
+          </div>
+
+          <!-- Camera status / instructions -->
+          <div class="d-flex align-items-center justify-content-between small text-muted mb-3 px-1">
+            <span id="scannerStatusText"><i class="bi bi-camera-video me-1"></i> Requesting camera access...</span>
+            <span id="scannerStatusBadge" class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25">Initializing</span>
+          </div>
+
+          <!-- Fallback: USB Laser Barcode Scanner or Manual Student ID Entry -->
+          <div class="pt-3 border-top border-secondary border-opacity-25">
+            <label class="form-label text-muted small fw-semibold">
+              <i class="bi bi-upc-scan me-1"></i> Or Scan via USB Barcode Gun / Manual Student ID
+            </label>
+            <form id="manualScanForm" class="input-group">
+              <input type="text" id="manualStudentIdInput" class="form-control bg-dark border-secondary text-white font-monospace" placeholder="e.g. CS2024001 or QR-STU-CS2024001" required autocomplete="off">
+              <button type="submit" class="btn btn-primary px-4 fw-medium">
+                <i class="bi bi-search me-1"></i> Submit
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right: Scanned Student Identity Card & Live Feed -->
+      <div class="col-lg-6">
+        
+        <!-- Live Scan Result Card (Populated dynamically on scan) -->
+        <div id="scanResultContainer">
+          
+          <!-- Default Placeholder State -->
+          <div class="card bg-dark-card border-0 shadow-sm p-4 text-center text-light mb-4" id="emptyResultPlaceholder" style="min-height: 280px; display: flex; align-items: center; justify-content: center;">
+            <div class="p-4 bg-primary bg-opacity-10 rounded-circle text-primary fs-1 mb-3">
+              <i class="bi bi-qr-code-scan"></i>
+            </div>
+            <h5 class="fw-bold text-white">Awaiting Student QR Scan</h5>
+            <p class="text-muted small mb-0" style="max-width: 340px;">
+              Hold the student's Digital Library Card or phone screen in front of the camera. The system will instantly log attendance and reveal student records.
+            </p>
+          </div>
+
+          <!-- Scanned Student Result Details Card (Hidden initially) -->
+          <div class="card bg-dark-card border-0 shadow-sm p-4 text-light mb-4 d-none result-card-anim" id="scannedStudentCard">
+            
+            <div class="d-flex justify-content-between align-items-start pb-3 border-bottom border-secondary border-opacity-25 mb-3 flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-3">
+                <div id="studentAvatarIcon" class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-3 shadow" style="width: 60px; height: 60px;">
+                  S
+                </div>
+                <div>
+                  <h4 class="fw-bold text-white mb-0" id="resStudentName">Student Name</h4>
+                  <div class="text-info font-monospace small" id="resStudentId">ID: CS2024001</div>
+                </div>
+              </div>
+              <div id="resAttendanceBadge">
+                <span class="badge bg-success py-2 px-3 fs-6 rounded-pill">
+                  <i class="bi bi-check2-circle me-1"></i> CHECK-IN RECORDED
+                </span>
+              </div>
+            </div>
+
+            <!-- Student Academic & Membership Info -->
+            <div class="row g-3 mb-3">
+              <div class="col-6 col-sm-3">
+                <span class="text-muted small d-block">DEPARTMENT</span>
+                <span class="fw-semibold text-white" id="resDepartment">CSE</span>
+              </div>
+              <div class="col-6 col-sm-3">
+                <span class="text-muted small d-block">COURSE</span>
+                <span class="fw-semibold text-white" id="resCourse">B.Tech</span>
+              </div>
+              <div class="col-6 col-sm-3">
+                <span class="text-muted small d-block">MEMBERSHIP</span>
+                <span id="resMembershipStatus"><span class="badge bg-success">ACTIVE</span></span>
+              </div>
+              <div class="col-6 col-sm-3">
+                <span class="text-muted small d-block">UNPAID FINES</span>
+                <span class="fw-bold" id="resFinesAmount">₹0.00</span>
+              </div>
+            </div>
+
+            <!-- Active Borrowed Books Notice -->
+            <div class="p-3 bg-dark rounded-3 border border-secondary border-opacity-25 mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold text-light small"><i class="bi bi-journal-bookmark me-1"></i> Active Borrowed Books</span>
+                <span class="badge bg-secondary" id="resActiveBooksCount">0 Books</span>
+              </div>
+              <div id="resActiveBooksList" class="small text-muted">
+                No active loans currently.
+              </div>
+            </div>
+
+            <!-- Direct Action Buttons -->
+            <div class="d-flex gap-2 justify-content-end flex-wrap pt-2">
+              <a href="#" id="resDirectIssueBtn" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="bi bi-plus-circle me-1"></i> Issue Book to Student
+              </a>
+              <a href="#" id="resViewProfileBtn" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                <i class="bi bi-person me-1"></i> Full Profile
+              </a>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Today's Recent Scans Stream -->
+        <div class="card bg-dark-card border-0 shadow-sm p-4 text-light">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold text-white mb-0">
+              <i class="bi bi-clock-history text-info me-2"></i> Recent Scans Today
+            </h6>
+            <span class="badge bg-secondary bg-opacity-25 text-light small" id="recentScansCount">
+              <%= recentScans.length %> Records
+            </span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-dark table-hover table-sm align-middle mb-0" style="font-size: 0.85rem;">
+              <thead class="text-muted border-secondary">
+                <tr>
+                  <th>Student</th>
+                  <th>ID</th>
+                  <th>Check-In</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="recentScansTableBody">
+                <% if (recentScans.length === 0) { %>
+                  <tr id="noRecentScansRow">
+                    <td colspan="4" class="text-center text-muted py-3">No scans recorded yet today.</td>
+                  </tr>
+                <% } else { %>
+                  <% recentScans.forEach(scan => { %>
+                    <tr>
+                      <td class="fw-medium text-white"><%= scan.student.user.name %></td>
+                      <td class="font-monospace text-info"><%= scan.student.student_id %></td>
+                      <td class="text-muted"><%= new Date(scan.check_in).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) %></td>
+                      <td>
+                        <span class="badge <%= scan.check_out ? 'bg-info' : 'bg-success' %> bg-opacity-25 <%= scan.check_out ? 'text-info' : 'text-success' %> border <%= scan.check_out ? 'border-info' : 'border-success' %> border-opacity-25">
+                          <%= scan.check_out ? 'CHECKED OUT' : 'PRESENT' %>
+                        </span>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <%- include('../../partials/footer.html') %>
+  </div>
+</div>
+
+  <!-- Camera Scanner Script with Audio Feedback -->
+  <script>
+    let html5QrCode = null;
+    let isScanning = false;
+    let currentCameraIndex = 0;
+    let availableCameras = [];
+    let isProcessingScan = false;
+
+    // Web Audio Synthetic Chime on Successful Scan
+    function playSuccessChime() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08); // A5
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.35);
+      } catch (e) {
+        // AudioContext not permitted without interaction
+      }
+    }
+
+    async function sendScanPayload(identifier, scanMode = 'QR_SCAN') {
+      if (isProcessingScan) return;
+      isProcessingScan = true;
+
+      try {
+        const response = await fetch('/attendance/api/scan', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ identifier, scanMode })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          playSuccessChime();
+          displayStudentResult(data);
+          updateCounters(data);
+          prependRecentScanRow(data);
+        } else {
+          alert('⚠️ Scan Notice: ' + (data.error || 'Student not found'));
+        }
+      } catch (error) {
+        console.error('Scan API error:', error);
+        alert('Network error connecting to attendance server.');
+      } finally {
+        setTimeout(() => {
+          isProcessingScan = false;
+        }, 1800); // 1.8s debounce before allowing next scan
+      }
+    }
+
+    function displayStudentResult(data) {
+      const student = data.student;
+      const att = data.attendance;
+
+      document.getElementById('emptyResultPlaceholder').classList.add('d-none');
+      const card = document.getElementById('scannedStudentCard');
+      card.classList.remove('d-none');
+      card.classList.remove('result-card-anim');
+      void card.offsetWidth; // Trigger reflow for animation
+      card.classList.add('result-card-anim');
+
+      document.getElementById('resStudentName').textContent = student.name;
+      document.getElementById('resStudentId').textContent = 'ID: ' + student.student_id;
+      document.getElementById('studentAvatarIcon').textContent = student.name.charAt(0).toUpperCase();
+      document.getElementById('resDepartment').textContent = student.department;
+      document.getElementById('resCourse').textContent = student.course;
+
+      // Badge status
+      const badgeWrap = document.getElementById('resAttendanceBadge');
+      if (data.action === 'CHECK_IN') {
+        badgeWrap.innerHTML = `<span class="badge bg-success py-2 px-3 fs-6 rounded-pill"><i class="bi bi-check-circle me-1"></i> CHECK-IN RECORDED</span>`;
+      } else if (data.action === 'CHECK_OUT') {
+        badgeWrap.innerHTML = `<span class="badge bg-info py-2 px-3 fs-6 rounded-pill"><i class="bi bi-box-arrow-right me-1"></i> CHECK-OUT RECORDED</span>`;
+      } else {
+        badgeWrap.innerHTML = `<span class="badge bg-warning text-dark py-2 px-3 fs-6 rounded-pill"><i class="bi bi-info-circle me-1"></i> ALREADY COMPLETED TODAY</span>`;
+      }
+
+      // Membership pass
+      const memWrap = document.getElementById('resMembershipStatus');
+      if (student.membership_pass && student.membership_pass.is_active) {
+        memWrap.innerHTML = `<span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">ACTIVE PASS</span>`;
+      } else {
+        memWrap.innerHTML = `<span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25">DUES PENDING</span>`;
+      }
+
+      // Fines
+      const finesWrap = document.getElementById('resFinesAmount');
+      if (student.unpaid_fines_total > 0) {
+        finesWrap.className = 'fw-bold text-danger';
+        finesWrap.textContent = '₹' + student.unpaid_fines_total.toFixed(2);
+      } else {
+        finesWrap.className = 'fw-bold text-success';
+        finesWrap.textContent = '₹0.00 (Clear)';
+      }
+
+      // Active Books
+      document.getElementById('resActiveBooksCount').textContent = student.active_issues_count + ' Books';
+      const booksList = document.getElementById('resActiveBooksList');
+      if (student.active_issues && student.active_issues.length > 0) {
+        booksList.innerHTML = student.active_issues.map(b => `
+          <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-secondary border-opacity-25">
+            <span class="text-white">${b.book_title}</span>
+            <span class="badge ${b.is_overdue ? 'bg-danger' : 'bg-secondary'}">${b.is_overdue ? 'OVERDUE' : 'Due: ' + new Date(b.due_date).toLocaleDateString()}</span>
+          </div>
+        `).join('');
+      } else {
+        booksList.innerHTML = '<span class="text-muted">No active borrowed books.</span>';
+      }
+
+      // Actions
+      document.getElementById('resDirectIssueBtn').href = `/issues/admin/create?studentId=${student.id}`;
+      document.getElementById('resViewProfileBtn').href = `/admin/students/${student.id}`;
+    }
+
+    function updateCounters(data) {
+      if (data.action === 'CHECK_IN') {
+        const countElem = document.getElementById('counterPresentToday');
+        if (countElem) {
+          countElem.textContent = parseInt(countElem.textContent || 0, 10) + 1;
+        }
+      } else if (data.action === 'CHECK_OUT') {
+        const outElem = document.getElementById('counterCheckedOut');
+        if (outElem) {
+          outElem.textContent = parseInt(outElem.textContent || 0, 10) + 1;
+        }
+      }
+    }
+
+    function prependRecentScanRow(data) {
+      const tbody = document.getElementById('recentScansTableBody');
+      const noRow = document.getElementById('noRecentScansRow');
+      if (noRow) noRow.remove();
+
+      const student = data.student;
+      const att = data.attendance;
+      const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+      const newRow = document.createElement('tr');
+      newRow.className = 'table-primary';
+      newRow.innerHTML = `
+        <td class="fw-medium text-white">${student.name}</td>
+        <td class="font-monospace text-info">${student.student_id}</td>
+        <td class="text-muted">${nowTime}</td>
+        <td>
+          <span class="badge ${data.action === 'CHECK_OUT' ? 'bg-info text-info' : 'bg-success text-success'} bg-opacity-25 border ${data.action === 'CHECK_OUT' ? 'border-info' : 'border-success'} border-opacity-25">
+            ${data.action === 'CHECK_OUT' ? 'CHECKED OUT' : 'PRESENT'}
+          </span>
+        </td>
+      `;
+
+      tbody.insertBefore(newRow, tbody.firstChild);
+      setTimeout(() => newRow.classList.remove('table-primary'), 2000);
+    }
+
+    // Initialize HTML5 Camera Scanner & Force Proactive Permission Request
+    async function forceRequestCamera() {
+      const statusText = document.getElementById('scannerStatusText');
+      const statusBadge = document.getElementById('scannerStatusBadge');
+      const permPrompt = document.getElementById('cameraPermissionPrompt');
+      const laser = document.getElementById('scannerLaser');
+      const pulse = document.getElementById('cameraPulseIndicator');
+
+      statusText.innerHTML = '<i class="bi bi-hourglass-split me-1 text-warning"></i> Requesting camera access from browser...';
+      statusBadge.className = 'badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25';
+      statusBadge.textContent = 'Requesting Permission';
+
+      try {
+        // Step 1: Forcibly request media permission prompt from the browser
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+              video: { facingMode: { ideal: 'environment' } } 
+            });
+            // Stop temporary validation stream
+            stream.getTracks().forEach(track => track.stop());
+          } catch (streamErr) {
+            console.warn('Initial facingMode:environment stream request fallback:', streamErr);
+            // Fallback generic video constraint
+            const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            fallbackStream.getTracks().forEach(track => track.stop());
+          }
+        }
+
+        // Step 2: Enumerate available cameras
+        const devices = await Html5Qrcode.getCameras();
+        if (!devices || devices.length === 0) {
+          throw new Error('No video cameras found on this device');
+        }
+
+        availableCameras = devices;
+        let selectedCamera = availableCameras[0].id;
+        const backCam = availableCameras.find(c => 
+          c.label.toLowerCase().includes('back') || 
+          c.label.toLowerCase().includes('rear') || 
+          c.label.toLowerCase().includes('environment')
+        );
+        if (backCam) {
+          selectedCamera = backCam.id;
+          currentCameraIndex = availableCameras.indexOf(backCam);
+        }
+
+        // Step 3: Stop existing instance if running
+        if (html5QrCode) {
+          try {
+            await html5QrCode.stop();
+          } catch (e) {}
+        } else {
+          html5QrCode = new Html5Qrcode("reader");
+        }
+
+        // Step 4: Hide permission prompt overlay and display scanner
+        if (permPrompt) permPrompt.classList.add('d-none');
+        if (laser) laser.style.display = 'block';
+        if (pulse) pulse.className = 'spinner-grow spinner-grow-sm text-success';
+
+        await html5QrCode.start(
+          selectedCamera,
+          {
+            fps: 15,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0
+          },
+          (decodedText) => {
+            sendScanPayload(decodedText, 'QR_SCAN');
+          },
+          (errorMessage) => {
+            // Frame scan loop
+          }
+        );
+
+        isScanning = true;
+        statusText.innerHTML = '<i class="bi bi-camera-video-fill text-success me-1"></i> Live camera active • Point at Student QR code';
+        statusBadge.className = 'badge bg-success bg-opacity-25 text-success border border-success border-opacity-25';
+        statusBadge.textContent = 'Live Active';
+        document.getElementById('restartCameraBtnText').textContent = 'Restart Camera';
+
+      } catch (err) {
+        console.error('Camera activation error:', err);
+        if (permPrompt) permPrompt.classList.remove('d-none');
+        if (laser) laser.style.display = 'none';
+        if (pulse) pulse.className = 'spinner-grow spinner-grow-sm text-danger';
+
+        const isDenied = err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
+        statusText.innerHTML = isDenied
+          ? '<span class="text-danger"><i class="bi bi-shield-x me-1"></i> Camera permission blocked. Please click "Allow" button above or enable camera in browser settings.</span>'
+          : '<span class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i> Camera unavailable: ' + (err.message || 'Please check device camera') + '</span>';
+
+        statusBadge.className = isDenied
+          ? 'badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25'
+          : 'badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25';
+        statusBadge.textContent = isDenied ? 'Access Blocked' : 'Error';
+      }
+    }
+
+    // Grant Camera Permission Button inside Overlay
+    document.getElementById('grantCameraPermissionBtn').addEventListener('click', forceRequestCamera);
+    
+    // Header Force / Restart Camera Button
+    document.getElementById('restartCameraBtn').addEventListener('click', forceRequestCamera);
+
+    // Switch Camera Button
+    document.getElementById('toggleCameraBtn').addEventListener('click', async () => {
+      if (!html5QrCode || availableCameras.length < 2) {
+        alert('Single camera detected. If using mobile phone with multiple lenses, ensure browser permission is granted.');
+        return;
+      }
+      try {
+        await html5QrCode.stop();
+        currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+        await html5QrCode.start(
+          availableCameras[currentCameraIndex].id,
+          { fps: 15, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+          (decodedText) => sendScanPayload(decodedText, 'QR_SCAN'),
+          () => {}
+        );
+      } catch (e) {
+        console.error('Error switching camera:', e);
+      }
+    });
+
+    // Handle Manual Barcode / Student ID Form
+    document.getElementById('manualScanForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('manualStudentIdInput');
+      if (input.value.trim()) {
+        sendScanPayload(input.value.trim(), 'MANUAL');
+        input.value = '';
+      }
+    });
+
+    // Forcibly request camera on page load
+    document.addEventListener('DOMContentLoaded', forceRequestCamera);
+  </script>
+</body>
+</html>

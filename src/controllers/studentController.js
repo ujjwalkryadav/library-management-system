@@ -116,21 +116,86 @@ async function renderProfile(req, res, next) {
 
 async function handleUpdateProfile(req, res, next) {
   try {
-    const { phone, address } = req.body;
-
-    await prisma.$transaction([
-      prisma.user.update({
+    const { name, phone, address } = req.body;
+    if (name || phone !== undefined) {
+      await prisma.user.update({
         where: { id: req.user.id },
-        data: { phone: phone ? phone.trim() : null }
-      }),
-      prisma.studentProfile.update({
-        where: { id: req.student.id },
-        data: { address: address ? address.trim() : null }
-      })
-    ]);
+        data: {
+          ...(name ? { name: name.trim() } : {}),
+          ...(phone !== undefined ? { phone: phone.trim() } : {})
+        }
+      });
+    }
 
-    setFlash(req, 'success', 'Profile contact details updated successfully.');
+    if (address !== undefined) {
+      await prisma.studentProfile.update({
+        where: { id: req.student.id },
+        data: { address: address.trim() }
+      });
+    }
+
+    setFlash(req, 'success', 'Profile updated successfully.');
     res.redirect('/student/profile');
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function renderStudentIdCard(req, res, next) {
+  try {
+    const student = await prisma.studentProfile.findUnique({
+      where: { id: req.student.id },
+      include: {
+        user: true,
+        memberships: {
+          orderBy: { valid_until: 'desc' },
+          take: 1
+        },
+        _count: {
+          select: {
+            issues: { where: { status: { in: ['ISSUED', 'OVERDUE'] } } },
+            attendances: true
+          }
+        }
+      }
+    });
+
+    if (!student) {
+      setFlash(req, 'error', 'Student profile not found.');
+      return res.redirect('/student/dashboard');
+    }
+
+    // Ensure qr_code_token exists
+    if (!student.qr_code_token) {
+      student.qr_code_token = `QR-STU-${student.student_id}`;
+      await prisma.studentProfile.update({
+        where: { id: student.id },
+        data: { qr_code_token: student.qr_code_token }
+      });
+    }
+
+    const activeMembership = student.memberships.length > 0 ? student.memberships[0] : null;
+
+    res.render('student/id-card', {
+      title: 'My Digital Library ID Card & QR Code | Central Library',
+      student,
+      activeMembership
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function renderStudentAttendance(req, res, next) {
+  try {
+    const student = req.student;
+    const attendanceService = require('../services/attendanceService');
+    const data = await attendanceService.getStudentAttendanceSummary(student.id);
+
+    res.render('student/attendance', {
+      title: 'My Library Attendance & Visit History | Central Library',
+      ...data
+    });
   } catch (error) {
     next(error);
   }
@@ -139,5 +204,8 @@ async function handleUpdateProfile(req, res, next) {
 module.exports = {
   renderDashboard,
   renderProfile,
-  handleUpdateProfile
+  handleUpdateProfile,
+  renderStudentIdCard,
+  renderStudentAttendance
 };
+

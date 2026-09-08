@@ -7,6 +7,7 @@ async function main() {
   console.log('🌱 Starting Library Management System database seeding with ONLY user-specified 7 books...');
 
   // 1. Clean existing records in reverse dependency order
+  await prisma.studentAttendance.deleteMany();
   await prisma.studentMembership.deleteMany();
   await prisma.employeeActivityLog.deleteMany();
   await prisma.employeePermission.deleteMany();
@@ -83,6 +84,9 @@ async function main() {
                 { permission: 'issues.view' },
                 { permission: 'issues.create' },
                 { permission: 'issues.return' },
+                { permission: 'attendance.view' },
+                { permission: 'attendance.scan' },
+                { permission: 'attendance.manage' },
                 { permission: 'notifications.view' }
               ]
             }
@@ -238,6 +242,7 @@ async function main() {
       student_profile: {
         create: {
           student_id: 'CS2024001',
+          qr_code_token: 'QR-STU-CS2024001',
           enrollment_number: 'EN2024CS01',
           department: 'Computer Science & Engineering',
           course: 'B.Tech CSE',
@@ -262,6 +267,7 @@ async function main() {
       student_profile: {
         create: {
           student_id: 'IT2024003',
+          qr_code_token: 'QR-STU-IT2024003',
           enrollment_number: 'EN2024IT03',
           department: 'Information Technology',
           course: 'B.Tech IT',
@@ -286,6 +292,7 @@ async function main() {
       student_profile: {
         create: {
           student_id: 'ME2024007',
+          qr_code_token: 'QR-STU-ME2024007',
           enrollment_number: 'EN2025ME07',
           department: 'Mechanical Engineering',
           course: 'B.Tech ME',
@@ -430,7 +437,58 @@ async function main() {
     ]
   });
 
-  console.log('✓ Seeded sample issues, overdue fines, requests, notifications, and activity logs.');
+  // Seed Student Attendance Records
+  const todayMorning = new Date();
+  todayMorning.setHours(9, 15, 0, 0);
+
+  const yesterdayMorning = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  yesterdayMorning.setHours(9, 30, 0, 0);
+  const yesterdayEvening = new Date(yesterdayMorning.getTime() + 3 * 60 * 60 * 1000);
+
+  await prisma.studentAttendance.createMany({
+    data: [
+      {
+        student_id: studentUser1.student_profile.id,
+        date: new Date(),
+        check_in: todayMorning,
+        status: 'PRESENT',
+        scanned_by: adminUser.id,
+        scan_mode: 'QR_SCAN',
+        notes: 'Scanned at Central Library Entry Gate'
+      },
+      {
+        student_id: studentUser2.student_profile.id,
+        date: new Date(),
+        check_in: new Date(todayMorning.getTime() + 45 * 60 * 1000),
+        status: 'PRESENT',
+        scanned_by: employeeUser.id,
+        scan_mode: 'QR_SCAN',
+        notes: 'Scanned at Circulation Desk'
+      },
+      {
+        student_id: studentUser1.student_profile.id,
+        date: yesterdayMorning,
+        check_in: yesterdayMorning,
+        check_out: yesterdayEvening,
+        status: 'PRESENT',
+        scanned_by: adminUser.id,
+        scan_mode: 'QR_SCAN',
+        notes: 'Study session in Reading Room B'
+      },
+      {
+        student_id: studentUser3.student_profile.id,
+        date: yesterdayMorning,
+        check_in: new Date(yesterdayMorning.getTime() + 90 * 60 * 1000),
+        check_out: new Date(yesterdayMorning.getTime() + 4 * 60 * 60 * 1000),
+        status: 'LATE',
+        scanned_by: employeeUser.id,
+        scan_mode: 'MANUAL',
+        notes: 'Manual entry by staff'
+      }
+    ]
+  });
+
+  console.log('✓ Seeded sample issues, overdue fines, requests, attendance records, notifications, and activity logs.');
   console.log('🎉 Database seeding completed with ONLY user Books!');
 }
 

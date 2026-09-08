@@ -1,0 +1,72 @@
+<header class="admin-topbar">
+  <div class="d-flex align-items-center gap-2 gap-sm-3">
+    <button class="btn btn-light d-lg-none border sidebar-toggle-trigger p-1 px-2" type="button" id="sidebarToggleBtn" onclick="if(window.toggleAppSidebar) window.toggleAppSidebar(event)" aria-label="Toggle Navigation Menu">
+      <i class="bi bi-list fs-5"></i>
+    </button>
+
+    <div class="topbar-search d-none d-md-block search-wrapper-relative">
+      <form action="/books" method="GET" class="m-0">
+        <i class="bi bi-search"></i>
+        <input type="text" id="topbarSearchInput" name="search" autocomplete="off" placeholder="Search catalog, students, authors...">
+        <span class="kbd-shortcut">⌘ K</span>
+      </form>
+      <div id="topbarSearchSuggestions" class="search-suggestions-box"></div>
+    </div>
+  </div>
+
+  <div class="d-flex align-items-center gap-2 gap-md-3">
+    <!-- Date Indicator -->
+    <div class="d-none d-sm-flex align-items-center gap-2 px-3 py-1 bg-light border rounded-pill small text-muted">
+      <i class="bi bi-calendar3 text-primary"></i>
+      <span><%= new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', weekday: 'short' }) %></span>
+    </div>
+
+    <!-- Notification Bell Dropdown -->
+    <%- include('./notifications-dropdown.html') %>
+
+    <!-- Quick Add New Dropdown -->
+    <div class="dropdown d-none d-sm-block">
+      <button class="btn btn-primary btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" id="addNewDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-plus-lg"></i>
+        <span>Add New</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="addNewDropdown">
+        <li><a class="dropdown-item py-2" href="/books/admin/create"><i class="bi bi-book me-2 text-primary"></i> Add New Book</a></li>
+        <li><a class="dropdown-item py-2" href="/issues/admin/create"><i class="bi bi-journal-plus me-2 text-success"></i> Direct Issue Book</a></li>
+        <li><a class="dropdown-item py-2" href="/admin/employees/create"><i class="bi bi-person-badge me-2 text-warning"></i> Add Employee Staff</a></li>
+        <li><a class="dropdown-item py-2" href="/attendance/scanner"><i class="bi bi-camera-fill me-2 text-info"></i> Scan Attendance</a></li>
+      </ul>
+    </div>
+
+    <!-- User Profile Dropdown -->
+    <div class="dropdown">
+      <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 border py-1 px-2" type="button" id="adminUserMenuBtn" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; font-size: 0.8rem; font-weight: 600;">
+          <%= currentUser.name.charAt(0).toUpperCase() %>
+        </div>
+        <span class="d-none d-md-inline fw-medium text-dark small"><%= currentUser.name.split(' ')[0] %></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="adminUserMenuBtn">
+        <li>
+          <div class="dropdown-header">
+            <strong><%= currentUser.name %></strong>
+            <div class="text-muted small"><%= currentUser.email %></div>
+          </div>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="/admin/dashboard"><i class="bi bi-speedometer2 me-2"></i> Admin Dashboard</a></li>
+        <li><a class="dropdown-item" href="/attendance/scanner"><i class="bi bi-camera-fill text-info me-2"></i> QR Scanner</a></li>
+        <li><a class="dropdown-item" href="/admin/profile"><i class="bi bi-person-gear me-2"></i> Admin Profile</a></li>
+        <li><a class="dropdown-item" href="/change-password"><i class="bi bi-key me-2"></i> Change Password</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <form action="/logout" method="POST" class="m-0">
+            <button type="submit" class="dropdown-item text-danger">
+              <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+            </button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+</header>

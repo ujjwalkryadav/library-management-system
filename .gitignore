@@ -11,3 +11,5 @@ dist/
 coverage/
 public/uploads/covers/*
 !public/uploads/covers/.gitkeep
+public/uploads/payments/*
+!public/uploads/payments/.gitkeep

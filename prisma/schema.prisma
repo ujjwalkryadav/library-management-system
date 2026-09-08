@@ -38,6 +38,13 @@ enum FineStatus {
   UNDER_VERIFICATION
 }
 
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  EXCUSED
+  ABSENT
+}
+
 enum NotificationType {
   BOOK_REQUEST
   REQUEST_APPROVED
@@ -45,6 +52,7 @@ enum NotificationType {
   BOOK_DUE
   BOOK_OVERDUE
   FINE
+  ATTENDANCE
   GENERAL
 }
 
@@ -60,12 +68,13 @@ model User {
   created_at    DateTime           @default(now())
   updated_at    DateTime           @updatedAt
 
-  student_profile   StudentProfile?
-  employee_profile  EmployeeProfile?
-  issued_records    IssuedBook[]       @relation("AdminIssued")
-  reviewed_requests BookIssueRequest[] @relation("AdminReviewed")
-  notifications     Notification[]
-  activity_logs     EmployeeActivityLog[]
+  student_profile      StudentProfile?
+  employee_profile     EmployeeProfile?
+  issued_records       IssuedBook[]          @relation("AdminIssued")
+  reviewed_requests    BookIssueRequest[]    @relation("AdminReviewed")
+  scanned_attendances  StudentAttendance[]   @relation("AttendanceScanner")
+  notifications        Notification[]
+  activity_logs        EmployeeActivityLog[]
 
   @@map("users")
 }
@@ -74,6 +83,7 @@ model StudentProfile {
   id                Int                @id @default(autoincrement())
   user_id           Int                @unique
   student_id        String             @unique
+  qr_code_token     String?            @unique
   enrollment_number String?
   department        String
   course            String
@@ -88,7 +98,9 @@ model StudentProfile {
   issues            IssuedBook[]
   fines             Fine[]
   memberships       StudentMembership[]
+  attendances       StudentAttendance[]
 
+  @@index([qr_code_token])
   @@map("student_profiles")
 }
 
@@ -321,4 +333,26 @@ model SystemSetting {
   updated_at  DateTime @updatedAt
 
   @@map("system_settings")
+}
+
+model StudentAttendance {
+  id           Int              @id @default(autoincrement())
+  student_id   Int
+  date         DateTime         @default(now())
+  check_in     DateTime         @default(now())
+  check_out    DateTime?
+  status       AttendanceStatus @default(PRESENT)
+  scanned_by   Int?
+  scan_mode    String           @default("QR_SCAN") // "QR_SCAN", "MANUAL", "BARCODE"
+  notes        String?
+  created_at   DateTime         @default(now())
+  updated_at   DateTime         @updatedAt
+
+  student      StudentProfile   @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  scanner      User?            @relation("AttendanceScanner", fields: [scanned_by], references: [id])
+
+  @@index([student_id])
+  @@index([date])
+  @@index([status])
+  @@map("student_attendances")
 }
