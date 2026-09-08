@@ -35,7 +35,7 @@ async function runTest() {
   const s2Login = await makeRequest('/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'email=student2@college.edu&password=Student123!&role=student'
+    body: 'email=student2@college.edu&password=Student@LmsSecure#2026&role=student'
   });
   console.log('1. Student 2 Login:', s2Login.statusCode === 302 ? '✅ PASS' : '❌ FAIL');
   const s2Cookie = s2Login.cookie;
@@ -105,7 +105,7 @@ async function runTest() {
   const adminLogin = await makeRequest('/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'email=admin@library.local&password=ChangeThisPassword123!&role=admin'
+    body: 'email=admin@library.local&password=Admin@LmsMaster#2026&role=admin'
   });
   const adminCookie = adminLogin.cookie;
 

@@ -38,7 +38,7 @@ async function run() {
   console.log('✅ PASS: Guest views have clean public navbar and footer');
 
   // 2. Student Views Check
-  const student = await loginUser('student1@college.edu', 'Student123!');
+  const student = await loginUser('student1@college.edu', 'Student@LmsSecure#2026');
   const studentUrls = [
     '/student/dashboard',
     '/books',
@@ -65,7 +65,7 @@ async function run() {
   }
 
   // 3. Admin Views Check
-  const admin = await loginUser('admin@library.local', 'ChangeThisPassword123!');
+  const admin = await loginUser('admin@library.local', 'Admin@LmsMaster#2026');
   const adminUrls = [
     '/admin/dashboard',
     '/attendance/scanner',
@@ -93,7 +93,7 @@ async function run() {
   }
 
   // 4. Employee Views Check
-  const employee = await loginUser('employee@library.local', 'Employee123!');
+  const employee = await loginUser('employee@library.local', 'Staff@LmsVault#2026');
   const employeeUrls = [
     '/employee/dashboard',
     '/attendance/scanner',

@@ -19,8 +19,8 @@ async function startServer() {
     console.log(`🚀 Library Management System is running!`);
     console.log(`📡 Local URL:    http://localhost:${PORT}`);
     console.log(`🌍 Environment:  ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🔐 Admin Login:  admin@library.local / ChangeThisPassword123!`);
-    console.log(`📚 Student Login: student1@college.edu / Student123!`);
+    console.log(`🔐 Admin Login:  admin@library.local / Admin@LmsMaster#2026`);
+    console.log(`📚 Student Login: student1@college.edu / Student@LmsSecure#2026`);
     console.log(`=======================================================`);
   });
 

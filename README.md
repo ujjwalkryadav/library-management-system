@@ -43,10 +43,10 @@
 
 | Role | Email Address | Password | Access Portal |
 | :--- | :--- | :--- | :--- |
-| **🛡️ Administrator** | `admin@library.local` | `ChangeThisPassword123!` | [Admin Console](https://library-management-system-kxep.onrender.com/login?role=admin) |
-| **💼 Staff / Employee** | `employee@library.local` | `Employee123!` | [Staff Portal](https://library-management-system-kxep.onrender.com/login?role=employee) |
-| **🎓 Student 1 (With Fines)** | `student1@college.edu` | `Student123!` | [Student Portal](https://library-management-system-kxep.onrender.com/login?role=student) |
-| **🎓 Student 2 (Pending Fee)**| `student2@college.edu` | `Student123!` | [Student Portal](https://library-management-system-kxep.onrender.com/login?role=student) |
+| **🛡️ Administrator** | `admin@library.local` | `Admin@LmsMaster#2026` | [Admin Console](https://library-management-system-kxep.onrender.com/login?role=admin) |
+| **💼 Staff / Employee** | `employee@library.local` | `Staff@LmsVault#2026` | [Staff Portal](https://library-management-system-kxep.onrender.com/login?role=employee) |
+| **🎓 Student 1 (With Fines)** | `student1@college.edu` | `Student@LmsSecure#2026` | [Student Portal](https://library-management-system-kxep.onrender.com/login?role=student) |
+| **🎓 Student 2 (Pending Fee)**| `student2@college.edu` | `Student@LmsSecure#2026` | [Student Portal](https://library-management-system-kxep.onrender.com/login?role=student) |
 
 *💡 Tip: On the login page, you can also use the **1-Click Demo Fillers** (`🎓 Student`, `💼 Staff`, `🛡️ Admin`) to populate credentials instantly without typing!*
 

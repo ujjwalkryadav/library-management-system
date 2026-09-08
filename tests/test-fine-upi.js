@@ -35,7 +35,7 @@ async function runTest() {
   const s1Login = await makeRequest('/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'email=student1@college.edu&password=Student123!&role=student'
+    body: 'email=student1@college.edu&password=Student@LmsSecure#2026&role=student'
   });
   console.log('1. Student 1 Login:', s1Login.statusCode === 302 ? '✅ PASS' : '❌ FAIL');
   const s1Cookie = s1Login.cookie;
@@ -58,51 +58,43 @@ async function runTest() {
       data: {
         student_id: student.id,
         issue_id: issue.id,
-        amount: 70.00,
-        reason: 'Overdue penalty: 14 days past due date',
-        status: 'UNPAID'
-      },
-      include: { issue: { include: { book: true } } }
+        amount: 50.00,
+        status: 'UNPAID',
+        reason: 'Late return penalty'
+      }
     });
   }
 
-  // 3. View Student Fines Page
-  const s1Fines = await makeRequest('/fines/student', {}, s1Cookie);
-  console.log('2. Student Fines view contains Pay Online (UPI) button:', s1Fines.body.includes('Pay Online (UPI)') ? '✅ PASS' : '❌ FAIL');
-  console.log('   Contains Pay Library Fine via UPI Modal:', s1Fines.body.includes('Pay Library Fine via UPI') ? '✅ PASS' : '❌ FAIL');
-  console.log('   Contains 2-Minute Timer:', s1Fines.body.includes('02:00') ? '✅ PASS' : '❌ FAIL');
-  console.log('   Contains QR Code image link (/images/upi_qr.jpg):', s1Fines.body.includes('/images/upi_qr.jpg') ? '✅ PASS' : '❌ FAIL');
-  console.log('   Contains 12-Digit UTR constraint:', s1Fines.body.includes('maxlength="12"') ? '✅ PASS' : '❌ FAIL');
-  console.log('   Policy Note in INR (₹5.00/day):', s1Fines.body.includes('₹') ? '✅ PASS' : '❌ FAIL');
+  // 3. Student visits fines page
+  const finesPage = await makeRequest('/fines/student', {}, s1Cookie);
+  console.log('2. Student Fines view contains Pay Online (UPI) button:', finesPage.body.includes('Pay Online (UPI)') ? '✅ PASS' : '❌ FAIL');
+  console.log('   Contains Pay Library Fine via UPI Modal:', finesPage.body.includes('Pay Library Fine via UPI') ? '✅ PASS' : '❌ FAIL');
+  console.log('   Contains 2-Minute Timer:', finesPage.body.includes('02:00') ? '✅ PASS' : '❌ FAIL');
+  console.log('   Contains QR Code image link (/images/upi_qr.jpg):', finesPage.body.includes('/images/upi_qr.jpg') ? '✅ PASS' : '❌ FAIL');
+  console.log('   Contains 12-Digit UTR constraint:', finesPage.body.includes('pattern="[0-9]{12}"') ? '✅ PASS' : '❌ FAIL');
+  console.log('   Policy Note in INR (₹5.00/day):', finesPage.body.includes('₹5.00/day') ? '✅ PASS' : '❌ FAIL');
 
-  // 4. Submit Fine UPI proof
+  // 4. Student Submits UPI Payment Proof for Fine
   const boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW';
-  const postData = [
-    '--' + boundary,
-    'Content-Disposition: form-data; name="utrNumber"',
-    '',
-    '987654321012',
-    '--' + boundary,
-    'Content-Disposition: form-data; name="paymentApp"',
-    '',
-    'PhonePe',
-    '--' + boundary,
-    'Content-Disposition: form-data; name="screenshot"; filename="fine_proof.jpg"',
-    'Content-Type: image/jpeg',
-    '',
-    'fake-fine-proof-bytes',
-    '--' + boundary + '--'
-  ].join('\r\n');
+  let body = '';
+  body += `--${boundary}\r\n`;
+  body += `Content-Disposition: form-data; name="utrNumber"\r\n\r\n`;
+  body += `987654321012\r\n`;
+  body += `--${boundary}\r\n`;
+  body += `Content-Disposition: form-data; name="screenshot"; filename="test-fine-proof.png"\r\n`;
+  body += `Content-Type: image/png\r\n\r\n`;
+  body += `dummy-fine-image-binary-data\r\n`;
+  body += `--${boundary}--\r\n`;
 
-  const fineSubmit = await makeRequest('/fines/student/' + fineToPay.id + '/pay-upi', {
+  const submitRes = await makeRequest('/fines/student/' + fineToPay.id + '/submit-upi', {
     method: 'POST',
     headers: {
-      'Content-Type': 'multipart/form-data; boundary=' + boundary
+      'Content-Type': `multipart/form-data; boundary=${boundary}`
     },
-    body: postData
+    body
   }, s1Cookie);
 
-  console.log('\n3. Student Submitted 12-Digit Fine UPI Proof (987654321012):', fineSubmit.statusCode === 302 ? '✅ PASS' : '❌ FAIL');
+  console.log('\n3. Student Submitted 12-Digit Fine UPI Proof (987654321012):', submitRes.statusCode === 302 ? '✅ PASS' : '❌ FAIL');
 
   const updatedFine = await prisma.fine.findUnique({ where: { id: fineToPay.id } });
   console.log('   DB Status updated to UNDER_VERIFICATION:', updatedFine.status === 'UNDER_VERIFICATION' ? '✅ PASS' : '❌ FAIL');
@@ -113,7 +105,7 @@ async function runTest() {
   const adminLogin = await makeRequest('/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'email=admin@library.local&password=ChangeThisPassword123!&role=admin'
+    body: 'email=admin@library.local&password=Admin@LmsMaster#2026&role=admin'
   });
   const adminCookie = adminLogin.cookie;
 

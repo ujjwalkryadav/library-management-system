@@ -69,7 +69,7 @@ async function verifyAllRoutes() {
     const adminLoginRes = await makeRequest('/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'email=admin@library.local&password=ChangeThisPassword123!'
+      body: 'email=admin@library.local&password=Admin@LmsMaster#2026'
     });
     check(adminLoginRes.statusCode === 302 && adminLoginRes.headers.location === '/admin/dashboard', 'POST /login authenticates Admin and redirects to /admin/dashboard');
 
@@ -110,7 +110,7 @@ async function verifyAllRoutes() {
     const empLoginRes = await makeRequest('/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'email=employee@library.local&password=Employee123!'
+      body: 'email=employee@library.local&password=Staff@LmsVault#2026'
     });
     check(empLoginRes.statusCode === 302 && empLoginRes.headers.location === '/employee/dashboard', 'POST /login authenticates Employee and redirects to /employee/dashboard');
 
@@ -132,7 +132,7 @@ async function verifyAllRoutes() {
     const studentLoginRes = await makeRequest('/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'email=student1@college.edu&password=Student123!'
+      body: 'email=student1@college.edu&password=Student@LmsSecure#2026'
     });
     check(studentLoginRes.statusCode === 302 && studentLoginRes.headers.location === '/student/dashboard', 'POST /login authenticates Student and redirects to /student/dashboard');
 

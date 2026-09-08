@@ -41,7 +41,7 @@ async function main() {
   console.log('✓ Seeded system settings.');
 
   // 3. Seed Admin User
-  const adminPasswordHash = await bcrypt.hash('ChangeThisPassword123!', 10);
+  const adminPasswordHash = await bcrypt.hash('Admin@LmsMaster#2026', 10);
   const adminUser = await prisma.user.create({
     data: {
       name: 'Chief Librarian Admin',
@@ -52,10 +52,10 @@ async function main() {
       is_active: true
     }
   });
-  console.log('✓ Seeded Admin User (admin@library.local / ChangeThisPassword123!)');
+  console.log('✓ Seeded Admin User (admin@library.local / Admin@LmsMaster#2026)');
 
   // 4. Seed Employee User (Staff)
-  const employeePasswordHash = await bcrypt.hash('Employee123!', 10);
+  const employeePasswordHash = await bcrypt.hash('Staff@LmsVault#2026', 10);
   const employeeUser = await prisma.user.create({
     data: {
       name: 'Pooja Sharma',
@@ -96,7 +96,7 @@ async function main() {
     },
     include: { employee_profile: true }
   });
-  console.log('✓ Seeded Employee User (employee@library.local / Employee123!)');
+  console.log('✓ Seeded Employee User (employee@library.local / Staff@LmsVault#2026)');
 
   // 5. Seed Categories matching the 7 books
   const categories = await Promise.all([
@@ -229,7 +229,7 @@ async function main() {
   console.log(`✓ Seeded ${createdBooks.length} books strictly matching the Books folder images.`);
 
   // 8. Seed Students
-  const studentPasswordHash = await bcrypt.hash('Student123!', 10);
+  const studentPasswordHash = await bcrypt.hash('Student@LmsSecure#2026', 10);
 
   const studentUser1 = await prisma.user.create({
     data: {
@@ -305,7 +305,7 @@ async function main() {
     },
     include: { student_profile: true }
   });
-  console.log('✓ Seeded 3 Student accounts (student1@college.edu / Student123!).');
+  console.log('✓ Seeded 3 Student accounts (student1@college.edu / Student@LmsSecure#2026).');
 
   // 9. Seed Initial Issues, Overdue Fines & Requests
   const now = new Date();
